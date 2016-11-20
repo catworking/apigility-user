@@ -1,1 +1,3 @@
-# apigility-user
+## 依赖 ##
+- doctrine/doctrine-orm-module
+- zend/config
