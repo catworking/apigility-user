@@ -40,7 +40,7 @@ class UserResource extends AbstractResourceListener
     }
 
     /**
-     * Fetch a resource
+     * 获取单个用户信息
      *
      * @param  mixed $id
      * @return ApiProblem|mixed
