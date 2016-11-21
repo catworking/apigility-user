@@ -146,6 +146,14 @@ class User
      */
     protected $chinese_zodiac;
 
+    /**
+     * 家庭住址
+     *
+     * @OneToOne(targetEntity="Address")
+     * @JoinColumn(name="home_address", referencedColumnName="id")
+     */
+    protected $home_address;
+
     public function setId ($id)
     {
         $this->id = $id;
