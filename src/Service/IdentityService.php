@@ -9,17 +9,42 @@ namespace ApigilityUser\Service;
 
 use Zend\ServiceManager\ServiceManager;
 use ApigilityUser\DoctrineEntity\Identity;
+use ApigilityUser\UserListener;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
 
-class IdentityService
+class IdentityService implements EventManagerAwareInterface
 {
+    protected $events;
+
     protected $em;
     protected $oauthUserManager;
-
+    protected $eventManager;
 
     public function __construct(ServiceManager $services)
     {
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->oauthUserManager = $services->get('ApigilityOauth2Adapter\OauthUserManager');
+        $this->eventManager = $services->get('EventManager');
+    }
+
+    public function setEventManager(EventManagerInterface $events)
+    {
+        $events->setIdentifiers([
+            __CLASS__,
+            get_called_class(),
+        ]);
+        $this->events = $events;
+        return $this;
+    }
+
+    public function getEventManager()
+    {
+        if (null === $this->events) {
+            $this->setEventManager(new EventManager());
+        }
+        return $this->events;
     }
 
     /**
@@ -60,6 +85,9 @@ class IdentityService
 
             $this->em->persist($identity);
             $this->em->flush();
+
+            // 触发标识已创建事件
+            $this->getEventManager()->trigger(UserListener::EVENT_IDENTITY_CREATED, $this, ['user_id' => $identity->getId()]);
 
             return $identity;
         } else {
