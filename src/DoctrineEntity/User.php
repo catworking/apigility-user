@@ -156,135 +156,153 @@ class User
      */
     protected $home_address;
 
-    public function setId ($id)
+    /**
+     * 用户类型
+     *
+     * @Column(type="string", length=50, nullable=true)
+     */
+    protected $type;
+
+    public function setId($id)
     {
         $this->id = $id;
         return $this;
     }
 
-    public function getId ()
+    public function getId()
     {
         return $this->id;
     }
 
-    public function setNickname ($nickname)
+    public function setNickname($nickname)
     {
         $this->nickname = $nickname;
         return $this;
     }
 
-    public function getNickname ()
+    public function getNickname()
     {
         return $this->nickname;
     }
 
-    public function setAvatar ($avatar)
+    public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
         return $this;
     }
 
-    public function getAvatar ()
+    public function getAvatar()
     {
         return $this->avatar;
     }
 
-    public function setSex ($sex)
+    public function setSex($sex)
     {
         $this->sex = $sex;
         return $this;
     }
 
-    public function getSex ()
+    public function getSex()
     {
         return $this->sex;
     }
 
-    public function setAge ($age)
+    public function setAge($age)
     {
         $this->age = $age;
         return $this;
     }
 
-    public function getAge ()
+    public function getAge()
     {
         return $this->age;
     }
 
-    public function setBirthday (\DateTime $birthday)
+    public function setBirthday(\DateTime $birthday)
     {
         $this->birthday = $birthday;
         return $this;
     }
 
-    public function getBirthday ()
+    public function getBirthday()
     {
         return $this->birthday;
     }
 
-    public function setStature ($stature)
+    public function setStature($stature)
     {
         $this->stature = $stature;
         return $this;
     }
 
-    public function getStature ()
+    public function getStature()
     {
         return $this->stature;
     }
 
-    public function setWeight ($weight)
+    public function setWeight($weight)
     {
         $this->weight = $weight;
         return $this;
     }
 
-    public function getWeight ()
+    public function getWeight()
     {
         return $this->weight;
     }
 
-    public function setEducation ($education)
+    public function setEducation($education)
     {
         $this->education = $education;
         return $this;
     }
 
-    public function getEducation ()
+    public function getEducation()
     {
         return $this->education;
     }
 
-    public function setEmotion ($emotion)
+    public function setEmotion($emotion)
     {
         $this->emotion = $emotion;
         return $this;
     }
 
-    public function getEmotion ()
+    public function getEmotion()
     {
         return $this->emotion;
     }
 
-    public function setZodiac ($zodiac)
+    public function setZodiac($zodiac)
     {
         $this->zodiac = $zodiac;
         return $this;
     }
 
-    public function getZodiac ()
+    public function getZodiac()
     {
         return $this->zodiac;
     }
 
-    public function setChineseZodiac ($chinese_zodiac)
+    public function setChineseZodiac($chinese_zodiac)
     {
         $this->chinese_zodiac = $chinese_zodiac;
         return $this;
     }
 
-    public function getChineseZodiac ()
+    public function getChineseZodiac()
     {
         return $this->chinese_zodiac;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 }
