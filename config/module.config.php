@@ -269,7 +269,7 @@ return [
         ],
         'ApigilityUser\\V1\\Rest\\User\\Validator' => [
             0 => [
-                'required' => true,
+                'required' => false,
                 'validators' => [],
                 'filters' => [],
                 'name' => 'id',

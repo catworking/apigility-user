@@ -4,16 +4,19 @@ namespace ApigilityUser\V1\Rest\User;
 use ZF\ApiProblem\ApiProblem;
 use ZF\Rest\AbstractResourceListener;
 use Zend\ServiceManager\ServiceManager;
+use Zend\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 
 class UserResource extends AbstractResourceListener
 {
     protected $services;
     protected $userService;
+    protected $objectPropertyHydrator;
 
     public function __construct(ServiceManager $services)
     {
         $this->services = $services;
         $this->userService = $services->get('ApigilityUser\Service\UserService');
+        $this->objectPropertyHydrator = new ObjectPropertyHydrator();
     }
 
     /**
@@ -76,7 +79,7 @@ class UserResource extends AbstractResourceListener
     }
 
     /**
-     * Patch (partial in-place update) a resource
+     * 修改单个用户信息
      *
      * @param  mixed $id
      * @param  mixed $data
@@ -84,7 +87,11 @@ class UserResource extends AbstractResourceListener
      */
     public function patch($id, $data)
     {
-        return new ApiProblem(405, 'The PATCH method has not been defined for individual resources');
+        try {
+            return new UserEntity($this->userService->updateUser($id, $this->objectPropertyHydrator->extract($data)));
+        } catch (\Exception $exception) {
+            return new ApiProblem($exception->getCode(), $exception);
+        }
     }
 
     /**
