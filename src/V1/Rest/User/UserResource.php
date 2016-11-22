@@ -3,9 +3,19 @@ namespace ApigilityUser\V1\Rest\User;
 
 use ZF\ApiProblem\ApiProblem;
 use ZF\Rest\AbstractResourceListener;
+use Zend\ServiceManager\ServiceManager;
 
 class UserResource extends AbstractResourceListener
 {
+    protected $services;
+    protected $userService;
+
+    public function __construct(ServiceManager $services)
+    {
+        $this->services = $services;
+        $this->userService = $services->get('ApigilityUser\Service\UserService');
+    }
+
     /**
      * Create a resource
      *
@@ -47,7 +57,11 @@ class UserResource extends AbstractResourceListener
      */
     public function fetch($id)
     {
-        return new ApiProblem(405, 'The GET method has not been defined for individual resources');
+        try {
+            return new UserEntity($this->userService->getUser($id));
+        } catch (\Exception $exception) {
+            return new ApiProblem($exception->getCode(), $exception);
+        }
     }
 
     /**
