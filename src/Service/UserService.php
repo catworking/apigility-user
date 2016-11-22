@@ -36,6 +36,13 @@ class UserService
         return $user;
     }
 
+    /**
+     * 更新单个用户信息
+     *
+     * @param $user_id
+     * @param $data
+     * @return mixed
+     */
     public function updateUser($user_id, $data)
     {
         $user = $this->getUser($user_id);
