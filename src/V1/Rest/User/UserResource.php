@@ -88,7 +88,7 @@ class UserResource extends AbstractResourceListener
     public function patch($id, $data)
     {
         try {
-            return new UserEntity($this->userService->updateUser($id, $this->objectPropertyHydrator->extract($data)));
+            return new UserEntity($this->userService->updateUser($id, $data));
         } catch (\Exception $exception) {
             return new ApiProblem($exception->getCode(), $exception);
         }

@@ -9,16 +9,19 @@ namespace ApigilityUser\Service;
 
 use Zend\ServiceManager\ServiceManager;
 use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
+use Zend\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 
 class UserService
 {
     protected $em;
     protected $classMethodsHydrator;
+    protected $objectPropertyHydrator;
 
     public function __construct(ServiceManager $services)
     {
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->classMethodsHydrator = new ClassMethodsHydrator();
+        $this->objectPropertyHydrator = new ObjectPropertyHydrator();
     }
 
     /**
@@ -46,7 +49,12 @@ class UserService
     public function updateUser($user_id, $data)
     {
         $user = $this->getUser($user_id);
-        $this->classMethodsHydrator->hydrate($data, $user);
+        if (isset($data->birthday)) {
+            $datetime = new \DateTime();
+            $datetime->setTimestamp($data->birthday);
+            $data->birthday = $datetime;
+        }
+        $this->classMethodsHydrator->hydrate($this->objectPropertyHydrator->extract($data), $user);
 
         $this->em->flush();
 

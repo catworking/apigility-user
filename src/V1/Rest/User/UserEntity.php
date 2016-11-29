@@ -167,7 +167,12 @@ class UserEntity
 
     public function setBirthday($birthday)
     {
-        $this->birthday = $birthday;
+        if ($birthday instanceof \DateTime) {
+            $this->birthday = $birthday->getTimestamp();
+        } else {
+            $this->birthday = $birthday;
+        }
+
         return $this;
     }
 
