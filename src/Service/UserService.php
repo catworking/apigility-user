@@ -17,11 +17,17 @@ class UserService
     protected $classMethodsHydrator;
     protected $objectPropertyHydrator;
 
+    /**
+     * @var \ZF\MvcAuth\Identity\AuthenticatedIdentity
+     */
+    protected $authIdentity;
+
     public function __construct(ServiceManager $services)
     {
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->objectPropertyHydrator = new ObjectPropertyHydrator();
+        $this->authIdentity = $services->get('api-identity');
     }
 
     /**
@@ -59,5 +65,14 @@ class UserService
         $this->em->flush();
 
         return $user;
+    }
+
+    /**
+     * 获取已登录的用户对象
+     * @return \ApigilityUser\DoctrineEntity\User
+     */
+    public function getAuthUser()
+    {
+        return  $this->getUser($this->authIdentity->getRoleId());
     }
 }
