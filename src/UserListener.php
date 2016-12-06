@@ -7,6 +7,7 @@
  */
 namespace ApigilityUser;
 
+use ApigilityUser\Service\IdentityService;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\ListenerAggregateTrait;
@@ -16,8 +17,6 @@ use ApigilityUser\DoctrineEntity\User;
 
 class UserListener implements ListenerAggregateInterface
 {
-    const EVENT_IDENTITY_CREATED = 'UserListener.EventIdentityCreated';
-
     use ListenerAggregateTrait;
 
     private $services;
@@ -29,7 +28,7 @@ class UserListener implements ListenerAggregateInterface
 
     public function attach(EventManagerInterface $events, $priority = 1)
     {
-        $this->listeners[] = $events->attach(self::EVENT_IDENTITY_CREATED, [$this, 'createUser'], $priority);
+        $this->listeners[] = $events->attach(IdentityService::EVENT_IDENTITY_CREATED, [$this, 'createUser'], $priority);
     }
 
     public function createUser(EventInterface $e)
@@ -37,12 +36,7 @@ class UserListener implements ListenerAggregateInterface
         $params = $e->getParams();
 
         // 创建用户记录
-        $entity_manager = $this->services->get('Doctrine\ORM\EntityManager');
-
-        $user = new User();
-        $user->setId($params['user_id']);
-
-        $entity_manager->persist($user);
-        $entity_manager->flush();
+        $userService = $this->services->get('ApigilityUser\Service\UserService');
+        $userService->createUser(json_decode('{"user_id":"'. $params['user_id'] .'"}'));
     }
 }

@@ -30,6 +30,13 @@ class Identity
      */
     protected $phone;
 
+    /**
+     * 类型
+     *
+     * @Column(type="string", length=50, nullable=true)
+     */
+    protected $type;
+
     public function getId()
     {
         return $this->id;
@@ -50,5 +57,16 @@ class Identity
     {
         $this->phone = $phone;
         return $this;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 }

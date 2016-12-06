@@ -8,6 +8,8 @@ class IdentityEntity
     protected $id;
     protected $phone;
 
+    protected $type;
+
     public function __construct(\ApigilityUser\DoctrineEntity\Identity $identity)
     {
         $hy = new ClassMethodsHydrator();
@@ -32,5 +34,16 @@ class IdentityEntity
     public function setPhone($phone)
     {
         return $this->phone = $phone;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 }

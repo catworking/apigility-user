@@ -7,12 +7,17 @@
  */
 namespace ApigilityUser\Service;
 
+use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
+use ApigilityUser\DoctrineEntity\User;
+use Zend\EventManager\EventManagerAwareInterface;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
 use Zend\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 
-class UserService
+class UserService extends ApigilityEventAwareObject
 {
+    const EVENT_USER_CREATED = 'UserService.EventUserCreated';
+
     protected $em;
     protected $classMethodsHydrator;
     protected $objectPropertyHydrator;
@@ -22,12 +27,32 @@ class UserService
      */
     protected $authIdentity;
 
+    protected $services;
+
     public function __construct(ServiceManager $services)
     {
+        $this->services = $services;
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->objectPropertyHydrator = new ObjectPropertyHydrator();
-        $this->authIdentity = $services->get('api-identity');
+    }
+
+    /**
+     * 创建一个用户
+     * @param $data
+     * @return User
+     */
+    public function createUser($data)
+    {
+        $user = new User();
+        $user->setId($data->user_id);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $this->getEventManager()->trigger(self::EVENT_USER_CREATED, $this, ['user' => $user]);
+
+        return $user;
     }
 
     /**
@@ -73,6 +98,7 @@ class UserService
      */
     public function getAuthUser()
     {
+        $this->authIdentity = $this->services->get('api-identity');
         return  $this->getUser($this->authIdentity->getRoleId());
     }
 }

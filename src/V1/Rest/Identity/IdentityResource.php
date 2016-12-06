@@ -28,7 +28,7 @@ class IdentityResource extends AbstractResourceListener
     public function create($data)
     {
         try {
-            $identity = $this->identityService->createIdentity($data->phone, $data->password);
+            $identity = $this->identityService->createIdentity($data);
             $identity_entity = new IdentityEntity($identity);
 
             return $identity_entity;

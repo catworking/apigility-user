@@ -266,6 +266,16 @@ return [
                 'allow_empty' => false,
                 'continue_if_empty' => true,
             ],
+            3 => [
+                'required' => false,
+                'validators' => [],
+                'filters' => [],
+                'name' => 'type',
+                'description' => '帐号类型',
+                'field_type' => 'string',
+                'allow_empty' => true,
+                'continue_if_empty' => true,
+            ],
         ],
         'ApigilityUser\\V1\\Rest\\User\\Validator' => [
             0 => [

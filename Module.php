@@ -1,8 +1,8 @@
 <?php
 namespace ApigilityUser;
 
-use Zend\EventManager\EventInterface as Event;
-use Zend\ModuleManager\ModuleManager;
+use Zend\ServiceManager\ServiceManager;
+use Zend\Mvc\MvcEvent;
 use ZF\Apigility\Provider\ApigilityProviderInterface;
 use Zend\Config\Config;
 
@@ -33,14 +33,18 @@ class Module implements ApigilityProviderInterface
         ];
     }
 
-    public function onBootstrap(Event $e)
+    public function onBootstrap(MvcEvent $e)
     {
         // This method is called once the MVC bootstrapping is complete
-        $application = $e->getApplication();
-        $services    = $application->getServiceManager();
-        $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
+        if ($e->getName() == MvcEvent::EVENT_BOOTSTRAP) {
+            $application = $e->getApplication();
+            $services    = $application->getServiceManager();
 
-        $user_listener = new UserListener($services);
-        $user_listener->attach($events);
+            $application->getEventManager()->attach(MvcEvent::EVENT_ROUTE, function () use ($services){
+                $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
+                $user_listener = new UserListener($services);
+                $user_listener->attach($events);
+            });
+        }
     }
 }
