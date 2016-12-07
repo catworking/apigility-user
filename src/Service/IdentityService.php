@@ -26,6 +26,19 @@ class IdentityService extends ApigilityEventAwareObject
     }
 
     /**
+     * @param $id
+     * @return \ApigilityUser\DoctrineEntity\Identity
+     * @throws Exception\UserNotExistException
+     */
+    public function getIdentity($id)
+    {
+        $identity = $this->em->find('ApigilityUser\DoctrineEntity\Identity', $id);
+        if (empty($identity)) throw new Exception\UserNotExistException();
+
+        return $identity;
+    }
+
+    /**
      * 检查用户标识是否存在
      *
      * @param $condition
