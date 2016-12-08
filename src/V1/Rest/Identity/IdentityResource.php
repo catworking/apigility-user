@@ -1,21 +1,19 @@
 <?php
 namespace ApigilityUser\V1\Rest\Identity;
 
+use ApigilityCatworkFoundation\Base\ApigilityResource;
 use ZF\ApiProblem\ApiProblem;
-use ZF\Rest\AbstractResourceListener;
 use Zend\ServiceManager\ServiceManager;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineToolPaginator;
 use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAdapter;
 
-class IdentityResource extends AbstractResourceListener
+class IdentityResource extends ApigilityResource
 {
     protected $identityService;
-    protected $services;
     protected $em;
 
     public function __construct(ServiceManager $services)
     {
-        $this->services = $services;
         $this->identityService = $services->get('ApigilityUser\Service\IdentityService');
         $this->em = $services->get('Doctrine\ORM\EntityManager');
     }
@@ -37,39 +35,6 @@ class IdentityResource extends AbstractResourceListener
         }
 
 
-    }
-
-    /**
-     * Delete a resource
-     *
-     * @param  mixed $id
-     * @return ApiProblem|mixed
-     */
-    public function delete($id)
-    {
-        return new ApiProblem(405, 'The DELETE method has not been defined for individual resources');
-    }
-
-    /**
-     * Delete a collection, or members of a collection
-     *
-     * @param  mixed $data
-     * @return ApiProblem|mixed
-     */
-    public function deleteList($data)
-    {
-        return new ApiProblem(405, 'The DELETE method has not been defined for collections');
-    }
-
-    /**
-     * Fetch a resource
-     *
-     * @param  mixed $id
-     * @return ApiProblem|mixed
-     */
-    public function fetch($id)
-    {
-        return new ApiProblem(405, 'The GET method has not been defined for individual resources');
     }
 
     /**
@@ -118,39 +83,5 @@ class IdentityResource extends AbstractResourceListener
         } catch (\Exception $exception) {
             return new ApiProblem($exception->getCode(),$exception);
         }
-    }
-
-    /**
-     * Patch (partial in-place update) a collection or members of a collection
-     *
-     * @param  mixed $data
-     * @return ApiProblem|mixed
-     */
-    public function patchList($data)
-    {
-        return new ApiProblem(405, 'The PATCH method has not been defined for collections');
-    }
-
-    /**
-     * Replace a collection or members of a collection
-     *
-     * @param  mixed $data
-     * @return ApiProblem|mixed
-     */
-    public function replaceList($data)
-    {
-        return new ApiProblem(405, 'The PUT method has not been defined for collections');
-    }
-
-    /**
-     * Update a resource
-     *
-     * @param  mixed $id
-     * @param  mixed $data
-     * @return ApiProblem|mixed
-     */
-    public function update($id, $data)
-    {
-        return new ApiProblem(405, 'The PUT method has not been defined for individual resources');
     }
 }

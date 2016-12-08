@@ -1,8 +1,10 @@
 <?php
 namespace ApigilityUser\V1\Rest\User;
 
-use Zend\Paginator\Paginator;
 
-class UserCollection extends Paginator
+use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareCollection;
+
+class UserCollection extends ApigilityObjectStorageAwareCollection
 {
+    protected $itemType = UserEntity::class;
 }

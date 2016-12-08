@@ -1,20 +1,9 @@
 <?php
 namespace ApigilityUser\V1\Rest\Identity;
 
-use Zend\Paginator\Paginator;
-use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
-use Zend\Stdlib\ArrayObject as ZendArrayObject;
+use ApigilityCatworkFoundation\Base\ApigilityCollection;
 
-class IdentityCollection extends Paginator
+class IdentityCollection extends ApigilityCollection
 {
-    public function getCurrentItems()
-    {
-        $set = parent::getCurrentItems();
-        $collection = new ZendArrayObject();
-
-        foreach ($set as $item) {
-            $collection->append(new IdentityEntity($item));
-        }
-        return $collection;
-    }
+    protected $itemType = IdentityEntity::class;
 }

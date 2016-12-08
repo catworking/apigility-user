@@ -1,9 +1,9 @@
 <?php
 namespace ApigilityUser\V1\Rest\User;
 
-use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
+use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
 
-class UserEntity
+class UserEntity extends ApigilityObjectStorageAwareEntity
 {
     /**
      * 用户标识
@@ -104,12 +104,6 @@ class UserEntity
      */
     protected $type;
 
-    public function __construct(\ApigilityUser\DoctrineEntity\User $user)
-    {
-        $hy = new ClassMethodsHydrator();
-        $hy->hydrate($hy->extract($user), $this);
-    }
-
     public function setId($id)
     {
         $this->id = $id;
@@ -140,7 +134,7 @@ class UserEntity
 
     public function getAvatar()
     {
-        return $this->avatar;
+        return $this->renderUriToUrl($this->avatar);
     }
 
     public function setSex($sex)

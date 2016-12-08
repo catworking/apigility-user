@@ -1,20 +1,14 @@
 <?php
 namespace ApigilityUser\V1\Rest\Identity;
 
-use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
+use ApigilityCatworkFoundation\Base\ApigilityEntity;
 
-class IdentityEntity
+class IdentityEntity extends ApigilityEntity
 {
     protected $id;
     protected $phone;
 
     protected $type;
-
-    public function __construct(\ApigilityUser\DoctrineEntity\Identity $identity)
-    {
-        $hy = new ClassMethodsHydrator();
-        $hy->hydrate($hy->extract($identity), $this);
-    }
 
     public function getId()
     {
