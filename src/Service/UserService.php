@@ -17,6 +17,7 @@ use Zend\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 class UserService extends ApigilityEventAwareObject
 {
     const EVENT_USER_CREATED = 'UserService.EventUserCreated';
+    const EVENT_USER_NICKNAME_UPDATE = 'UserService.EVENT_USER_NICKNAME_UPDATE';
 
     protected $em;
     protected $classMethodsHydrator;
@@ -85,9 +86,15 @@ class UserService extends ApigilityEventAwareObject
             $datetime->setTimestamp($data->birthday);
             $data->birthday = $datetime;
         }
+
         $this->classMethodsHydrator->hydrate($this->objectPropertyHydrator->extract($data), $user);
 
         $this->em->flush();
+
+        if (isset($data->nickname)) {
+            // 触发事件
+            $this->getEventManager()->trigger(self::EVENT_USER_NICKNAME_UPDATE, $this, ['user' => $user]);
+        }
 
         return $user;
     }

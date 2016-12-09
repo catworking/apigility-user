@@ -17,12 +17,15 @@ class EaseMobService
      */
     protected $hxCall;
 
+    protected $config;
+
     public function __construct(ServiceManager $services)
     {
         $config = $services->get('config');
         if (!isset($config['apigility-user']['ease-mob'])) throw new \Exception('没有配置环信', 500);
         else $config = $config['apigility-user']['ease-mob'];
 
+        $this->config = $config;
         $this->hxCall = new HxCall($config);
     }
 
@@ -30,13 +33,12 @@ class EaseMobService
      * 创建环信帐户
      *
      * @param $username
-     * @param $password
      * @param $nickname
      * @return mixed
      */
-    public function createAccount($username, $password, $nickname)
+    public function createAccount($username, $nickname)
     {
-        return $this->hxCall->hx_register($username, $password, $nickname);
+        return $this->hxCall->hx_register($username, $this->config['account_register_password'], $nickname);
     }
 
     /**

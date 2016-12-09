@@ -51,7 +51,10 @@ class Module implements ApigilityProviderInterface
                 $config = $services->get('config');
                 if ($config['apigility-user']['ease-mob']['enable']) {
                     $easeMob_listener = new EaseMobListener($services);
-                    $easeMob_listener->attach($events);
+                    $easeMob_listener->attachToIdentityService($events);
+
+                    $userServiceEvents = $services->get('ApigilityUser\Service\UserService')->getEventManager();
+                    $easeMob_listener->attachToUserService($userServiceEvents);
                 }
             });
         }

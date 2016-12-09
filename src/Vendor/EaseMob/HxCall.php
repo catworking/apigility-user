@@ -183,7 +183,20 @@ class HxCall
     {
         $headers = array_merge($header,array('Content-Type' => 'application/json'));
 
-        $response = Requests::post($url,$headers,json_encode($data));
+        $response = null;
+        switch ($method) {
+            case 'POST':
+                $response = Requests::post($url,$headers,json_encode($data));
+                break;
+
+            case 'PUT':
+                $response = Requests::put($url,$headers,json_encode($data));
+                break;
+
+            default:
+                throw  new \Exception('未处理的HTTP METHOD', 500);
+        }
+
         return $response->body;
     }
 }

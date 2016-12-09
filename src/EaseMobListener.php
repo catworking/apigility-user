@@ -8,6 +8,7 @@
 namespace ApigilityUser;
 
 use ApigilityUser\Service\IdentityService;
+use ApigilityUser\Service\UserService;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\ListenerAggregateTrait;
@@ -15,9 +16,9 @@ use Zend\EventManager\EventInterface;
 use Zend\ServiceManager\ServiceManager;
 use ApigilityUser\DoctrineEntity\User;
 
-class EaseMobListener implements ListenerAggregateInterface
+class EaseMobListener
 {
-    use ListenerAggregateTrait;
+    protected $listeners = [];
 
     private $services;
 
@@ -31,16 +32,29 @@ class EaseMobListener implements ListenerAggregateInterface
         $this->services = $services;
     }
 
-    public function attach(EventManagerInterface $events, $priority = 1)
+    public function attachToIdentityService(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(IdentityService::EVENT_IDENTITY_CREATED, [$this, 'createAccount'], $priority);
+    }
+
+    public function attachToUserService(EventManagerInterface $events, $priority = 1)
+    {
+        $this->listeners[] = $events->attach(UserService::EVENT_USER_NICKNAME_UPDATE, [$this, 'updateAccountNickname'], $priority);
+
     }
 
     public function createAccount(EventInterface $e)
     {
         $params = $e->getParams();
 
-        $this->getEaseMobService()->createAccount($params['user_id'], $params['password'], '用户'.$params['user_id']);
+        $this->getEaseMobService()->createAccount($params['user_id'], '用户'.$params['user_id']);
+    }
+
+    public function updateAccountNickname(EventInterface $e)
+    {
+        $params = $e->getParams();
+
+        $this->getEaseMobService()->updateNickname($params['user']->getId(), $params['user']->getNickname());
     }
 
     /**
