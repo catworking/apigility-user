@@ -9,7 +9,8 @@ return [
     'service_manager' => array(
         'factories' => array(
             'ApigilityUser\Service\IdentityService' => 'ApigilityUser\Service\IdentityServiceFactory',
-            'ApigilityUser\Service\UserService' => 'ApigilityUser\Service\UserServiceFactory'
+            'ApigilityUser\Service\UserService' => 'ApigilityUser\Service\UserServiceFactory',
+            'ApigilityUser\Service\EaseMobService' => 'ApigilityUser\Service\EaseMobServiceFactory'
         ),
     )
 ];

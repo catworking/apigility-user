@@ -80,7 +80,10 @@ class IdentityService extends ApigilityEventAwareObject
             $this->em->flush();
 
             // 触发标识已创建事件
-            $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, ['user_id' => $identity->getId()]);
+            $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, [
+                'user_id' => $identity->getId(),
+                'password'=>$data->password
+            ]);
             return $identity;
         } else {
             throw new Exception\PhoneExistException();

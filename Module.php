@@ -14,10 +14,12 @@ class Module implements ApigilityProviderInterface
     {
         $doctrine_config = new Config(include __DIR__ . '/config/doctrine.config.php');
         $service_config = new Config(include __DIR__ . '/config/service.config.php');
+        $manual_config = new Config(include __DIR__ . '/config/manual.config.php');
 
         $module_config = new Config(include __DIR__ . '/config/module.config.php');
         $module_config->merge($doctrine_config);
         $module_config->merge($service_config);
+        $module_config->merge($manual_config);
 
         return $module_config;
     }
@@ -44,6 +46,13 @@ class Module implements ApigilityProviderInterface
                 $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
                 $user_listener = new UserListener($services);
                 $user_listener->attach($events);
+
+
+                $config = $services->get('config');
+                if ($config['apigility-user']['ease-mob']['enable']) {
+                    $easeMob_listener = new EaseMobListener($services);
+                    $easeMob_listener->attach($events);
+                }
             });
         }
     }
