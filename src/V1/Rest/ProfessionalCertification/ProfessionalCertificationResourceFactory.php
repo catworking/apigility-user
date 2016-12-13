@@ -5,6 +5,6 @@ class ProfessionalCertificationResourceFactory
 {
     public function __invoke($services)
     {
-        return new ProfessionalCertificationResource();
+        return new ProfessionalCertificationResource($services);
     }
 }

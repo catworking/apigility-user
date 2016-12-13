@@ -16,4 +16,11 @@ return [
             'account_register_password'=>''
         ],
     ],
+    'zf-mvc-auth' => [
+        'authentication' => [
+            'map' => [
+                'ApigilityUser\\V1' => 'apigilityoauth2adapter',
+            ],
+        ],
+    ],
 ];

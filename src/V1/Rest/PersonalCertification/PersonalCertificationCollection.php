@@ -1,8 +1,9 @@
 <?php
 namespace ApigilityUser\V1\Rest\PersonalCertification;
 
-use Zend\Paginator\Paginator;
+use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareCollection;
 
-class PersonalCertificationCollection extends Paginator
+class PersonalCertificationCollection extends ApigilityObjectStorageAwareCollection
 {
+    protected $itemType = PersonalCertificationEntity::class;
 }

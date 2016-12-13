@@ -2,6 +2,9 @@
 namespace ApigilityUser\V1\Rest\User;
 
 use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use ApigilityUser\DoctrineEntity\PersonalCertification;
+use ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationEntity;
+use ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationEntity;
 
 class UserEntity extends ApigilityObjectStorageAwareEntity
 {
@@ -103,6 +106,20 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
      * @Column(type="string", length=50, nullable=true)
      */
     protected $type;
+
+    /**
+     * 个人实名认证
+     *
+     * @OneToOne(targetEntity="PersonalCertification", mappedBy="user")
+     */
+    protected $personalCertification;
+
+    /**
+     * 职业认证
+     *
+     * @OneToMany(targetEntity="ProfessionalCertification", mappedBy="user")
+     */
+    protected $professionalCertifications;
 
     public function setId($id)
     {
@@ -250,5 +267,33 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
     public function getType()
     {
         return $this->type;
+    }
+
+    public function setPersonalCertification($personalCertification)
+    {
+        $this->personalCertification = $personalCertification;
+        return $this;
+    }
+
+    public function getPersonalCertification()
+    {
+        if ($this->personalCertification instanceof PersonalCertification) return $this->hydrator->extract(new PersonalCertificationEntity($this->personalCertification, $this->serviceManager));
+        else return $this->personalCertification;
+    }
+
+    public function setProfessionalCertifications($professionalCertifications)
+    {
+        $this->professionalCertifications = $professionalCertifications;
+        return $this;
+    }
+
+    public function getProfessionalCertifications()
+    {
+        return $this->getJsonValueFromDoctrineCollection($this->professionalCertifications, ProfessionalCertificationEntity::class, $this->serviceManager);
+    }
+
+    public function addProfessionalCertification($professionalCertification)
+    {
+        $this->professionalCertifications[] = $professionalCertification;
     }
 }

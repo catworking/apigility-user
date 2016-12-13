@@ -1,10 +1,37 @@
 <?php
-namespace ApigilityUser\V1\Rest\ProfessionalCertification;
+/**
+ * Created by PhpStorm.
+ * User: figo-007
+ * Date: 2016/12/13
+ * Time: 15:28
+ */
+namespace ApigilityUser\DoctrineEntity;
 
-use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\Common\Collections\ArrayCollection;
+use ApigilityUser\DoctrineEntity\User;
 
-class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
+/**
+ * Class ProfessionalCertification
+ * @package ApigilityUser\DoctrineEntity
+ * @Entity @Table(name="apigilityuser_professional_certification")
+ */
+class ProfessionalCertification
 {
+    const STATUS_NOT_REVIEW = 1;
+    const STATUS_REVIEWED_REJECT = 2;
+    const STATUS_REVIEWED_OK = 3;
+
     /**
      * @Id @Column(type="integer")
      * @GeneratedValue
@@ -12,17 +39,17 @@ class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
     protected $id;
 
     /**
-     * @Column(type="string", length=50, unique=true)
+     * @Column(type="string", length=50, nullable=true)
      */
     protected $identity_card_number;
 
     /**
-     * @Column(type="string", length=255, unique=true)
+     * @Column(type="string", length=255, nullable=true)
      */
     protected $certification_image_front;
 
     /**
-     * @Column(type="string", length=255, unique=true)
+     * @Column(type="string", length=255, nullable=true)
      */
     protected $certification_image_back;
 

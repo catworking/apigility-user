@@ -9,7 +9,7 @@ return array(
     'doctrine' => array(
         'driver' => array(
             // defines an annotation driver with two paths, and names it `my_annotation_driver`
-            'my_annotation_driver' => array(
+            'apigility_user_annotation_driver' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
                 'cache' => 'array',
                 'paths' => array(
@@ -22,7 +22,7 @@ return array(
             'orm_default' => array(
                 'drivers' => array(
                     // register `my_annotation_driver` for any entity under namespace `My\Namespace`
-                    'ApigilityUser\DoctrineEntity' => 'my_annotation_driver'
+                    'ApigilityUser\DoctrineEntity' => 'apigility_user_annotation_driver'
                 )
             )
         )

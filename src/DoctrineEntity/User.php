@@ -8,12 +8,18 @@
 
 namespace ApigilityUser\DoctrineEntity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * Class User
@@ -163,6 +169,25 @@ class User
      */
     protected $type;
 
+    /**
+     * 个人实名认证
+     *
+     * @OneToOne(targetEntity="PersonalCertification", mappedBy="user")
+     */
+    protected $personalCertification;
+
+    /**
+     * 职业认证
+     *
+     * @OneToMany(targetEntity="ProfessionalCertification", mappedBy="user")
+     */
+    protected $professionalCertifications;
+
+    public function __construct()
+    {
+        $this->professionalCertifications = new ArrayCollection();
+    }
+
     public function setId($id)
     {
         $this->id = $id;
@@ -304,5 +329,32 @@ class User
     public function getType()
     {
         return $this->type;
+    }
+
+    public function setPersonalCertification($personalCertification)
+    {
+        $this->personalCertification = $personalCertification;
+        return $this;
+    }
+
+    public function getPersonalCertification()
+    {
+        return $this->personalCertification;
+    }
+
+    public function setProfessionalCertifications($professionalCertifications)
+    {
+        $this->professionalCertifications = $professionalCertifications;
+        return $this;
+    }
+
+    public function getProfessionalCertifications()
+    {
+        return $this->professionalCertifications;
+    }
+
+    public function addProfessionalCertification($professionalCertification)
+    {
+        $this->professionalCertifications[] = $professionalCertification;
     }
 }
