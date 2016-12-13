@@ -4,7 +4,8 @@ return [
         'factories' => [
             \ApigilityUser\V1\Rest\User\UserResource::class => \ApigilityUser\V1\Rest\User\UserResourceFactory::class,
             \ApigilityUser\V1\Rest\Identity\IdentityResource::class => \ApigilityUser\V1\Rest\Identity\IdentityResourceFactory::class,
-            \ApigilityUser\V1\Rest\Certification\CertificationResource::class => \ApigilityUser\V1\Rest\Certification\CertificationResourceFactory::class,
+            \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationResource::class => \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationResourceFactory::class,
+            \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationResource::class => \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationResourceFactory::class,
         ],
     ],
     'router' => [
@@ -12,7 +13,7 @@ return [
             'apigility-user.rest.user' => [
                 'type' => 'Segment',
                 'options' => [
-                    'route' => '/user[/:user_id]',
+                    'route' => '/user/user[/:user_id]',
                     'defaults' => [
                         'controller' => 'ApigilityUser\\V1\\Rest\\User\\Controller',
                     ],
@@ -21,18 +22,27 @@ return [
             'apigility-user.rest.identity' => [
                 'type' => 'Segment',
                 'options' => [
-                    'route' => '/identity[/:identity_id]',
+                    'route' => '/user/identity[/:identity_id]',
                     'defaults' => [
                         'controller' => 'ApigilityUser\\V1\\Rest\\Identity\\Controller',
                     ],
                 ],
             ],
-            'apigility-user.rest.certification' => [
+            'apigility-user.rest.personal-certification' => [
                 'type' => 'Segment',
                 'options' => [
-                    'route' => '/certification[/:certification_id]',
+                    'route' => '/user/personal-certification[/:personal_certification_id]',
                     'defaults' => [
-                        'controller' => 'ApigilityUser\\V1\\Rest\\Certification\\Controller',
+                        'controller' => 'ApigilityUser\\V1\\Rest\\PersonalCertification\\Controller',
+                    ],
+                ],
+            ],
+            'apigility-user.rest.professional-certification' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => '/user/professional-certification[/:professional_certification_id]',
+                    'defaults' => [
+                        'controller' => 'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Controller',
                     ],
                 ],
             ],
@@ -42,7 +52,8 @@ return [
         'uri' => [
             0 => 'apigility-user.rest.user',
             1 => 'apigility-user.rest.identity',
-            2 => 'apigility-user.rest.certification',
+            2 => 'apigility-user.rest.personal-certification',
+            3 => 'apigility-user.rest.professional-certification',
         ],
     ],
     'zf-rest' => [
@@ -87,11 +98,11 @@ return [
             'collection_class' => \ApigilityUser\V1\Rest\Identity\IdentityCollection::class,
             'service_name' => 'identity',
         ],
-        'ApigilityUser\\V1\\Rest\\Certification\\Controller' => [
-            'listener' => \ApigilityUser\V1\Rest\Certification\CertificationResource::class,
-            'route_name' => 'apigility-user.rest.certification',
-            'route_identifier_name' => 'certification_id',
-            'collection_name' => 'certification',
+        'ApigilityUser\\V1\\Rest\\PersonalCertification\\Controller' => [
+            'listener' => \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationResource::class,
+            'route_name' => 'apigility-user.rest.personal-certification',
+            'route_identifier_name' => 'personal_certification_id',
+            'collection_name' => 'personal_certification',
             'entity_http_methods' => [
                 0 => 'GET',
                 1 => 'PATCH',
@@ -105,16 +116,39 @@ return [
             'collection_query_whitelist' => [],
             'page_size' => 25,
             'page_size_param' => null,
-            'entity_class' => \ApigilityUser\V1\Rest\Certification\CertificationEntity::class,
-            'collection_class' => \ApigilityUser\V1\Rest\Certification\CertificationCollection::class,
-            'service_name' => 'certification',
+            'entity_class' => \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationEntity::class,
+            'collection_class' => \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationCollection::class,
+            'service_name' => 'PersonalCertification',
+        ],
+        'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Controller' => [
+            'listener' => \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationResource::class,
+            'route_name' => 'apigility-user.rest.professional-certification',
+            'route_identifier_name' => 'professional_certification_id',
+            'collection_name' => 'professional_certification',
+            'entity_http_methods' => [
+                0 => 'GET',
+                1 => 'PATCH',
+                2 => 'PUT',
+                3 => 'DELETE',
+            ],
+            'collection_http_methods' => [
+                0 => 'GET',
+                1 => 'POST',
+            ],
+            'collection_query_whitelist' => [],
+            'page_size' => 25,
+            'page_size_param' => null,
+            'entity_class' => \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationEntity::class,
+            'collection_class' => \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationCollection::class,
+            'service_name' => 'ProfessionalCertification',
         ],
     ],
     'zf-content-negotiation' => [
         'controllers' => [
             'ApigilityUser\\V1\\Rest\\User\\Controller' => 'HalJson',
             'ApigilityUser\\V1\\Rest\\Identity\\Controller' => 'HalJson',
-            'ApigilityUser\\V1\\Rest\\Certification\\Controller' => 'HalJson',
+            'ApigilityUser\\V1\\Rest\\PersonalCertification\\Controller' => 'HalJson',
+            'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Controller' => 'HalJson',
         ],
         'accept_whitelist' => [
             'ApigilityUser\\V1\\Rest\\User\\Controller' => [
@@ -127,7 +161,12 @@ return [
                 1 => 'application/hal+json',
                 2 => 'application/json',
             ],
-            'ApigilityUser\\V1\\Rest\\Certification\\Controller' => [
+            'ApigilityUser\\V1\\Rest\\PersonalCertification\\Controller' => [
+                0 => 'application/vnd.apigility-user.v1+json',
+                1 => 'application/hal+json',
+                2 => 'application/json',
+            ],
+            'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Controller' => [
                 0 => 'application/vnd.apigility-user.v1+json',
                 1 => 'application/hal+json',
                 2 => 'application/json',
@@ -142,7 +181,11 @@ return [
                 0 => 'application/vnd.apigility-user.v1+json',
                 1 => 'application/json',
             ],
-            'ApigilityUser\\V1\\Rest\\Certification\\Controller' => [
+            'ApigilityUser\\V1\\Rest\\PersonalCertification\\Controller' => [
+                0 => 'application/vnd.apigility-user.v1+json',
+                1 => 'application/json',
+            ],
+            'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Controller' => [
                 0 => 'application/vnd.apigility-user.v1+json',
                 1 => 'application/json',
             ],
@@ -174,16 +217,28 @@ return [
                 'route_identifier_name' => 'identity_id',
                 'is_collection' => true,
             ],
-            \ApigilityUser\V1\Rest\Certification\CertificationEntity::class => [
+            \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationEntity::class => [
                 'entity_identifier_name' => 'id',
-                'route_name' => 'apigility-user.rest.certification',
-                'route_identifier_name' => 'certification_id',
+                'route_name' => 'apigility-user.rest.personal-certification',
+                'route_identifier_name' => 'personal_certification_id',
                 'hydrator' => \Zend\Hydrator\ArraySerializable::class,
             ],
-            \ApigilityUser\V1\Rest\Certification\CertificationCollection::class => [
+            \ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationCollection::class => [
                 'entity_identifier_name' => 'id',
-                'route_name' => 'apigility-user.rest.certification',
-                'route_identifier_name' => 'certification_id',
+                'route_name' => 'apigility-user.rest.personal-certification',
+                'route_identifier_name' => 'personal_certification_id',
+                'is_collection' => true,
+            ],
+            \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationEntity::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'apigility-user.rest.professional-certification',
+                'route_identifier_name' => 'professional_certification_id',
+                'hydrator' => \Zend\Hydrator\ArraySerializable::class,
+            ],
+            \ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationCollection::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'apigility-user.rest.professional-certification',
+                'route_identifier_name' => 'professional_certification_id',
                 'is_collection' => true,
             ],
         ],

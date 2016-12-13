@@ -1,10 +1,10 @@
 <?php
-namespace ApigilityUser\V1\Rest\Certification;
+namespace ApigilityUser\V1\Rest\PersonalCertification;
 
 use ZF\ApiProblem\ApiProblem;
 use ZF\Rest\AbstractResourceListener;
 
-class CertificationResource extends AbstractResourceListener
+class PersonalCertificationResource extends AbstractResourceListener
 {
     /**
      * Create a resource
