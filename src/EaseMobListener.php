@@ -47,14 +47,22 @@ class EaseMobListener
     {
         $params = $e->getParams();
 
-        $this->getEaseMobService()->createAccount($params['user_id'], '用户'.$params['user_id']);
+        try {
+            return $this->getEaseMobService()->createAccount($params['user_id'], '用户'.$params['user_id']);
+        } catch (\Exception $exception) {
+            return false;
+        }
     }
 
     public function updateAccountNickname(EventInterface $e)
     {
         $params = $e->getParams();
 
-        $this->getEaseMobService()->updateNickname($params['user']->getId(), $params['user']->getNickname());
+        try {
+            return $this->getEaseMobService()->updateNickname($params['user']->getId(), $params['user']->getNickname());
+        } catch (\Exception $exception) {
+            return false;
+        }
     }
 
     /**
