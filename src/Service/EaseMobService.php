@@ -22,7 +22,7 @@ class EaseMobService
     public function __construct(ServiceManager $services)
     {
         $config = $services->get('config');
-        if (!isset($config['apigility-user']['ease-mob'])) throw new \Exception('没有配置环信', 500);
+        if (!isset($config['apigility-user']['ease-mob']['enable'])) throw new \Exception('没有配置环信', 500);
         else $config = $config['apigility-user']['ease-mob'];
 
         $this->config = $config;
@@ -38,7 +38,10 @@ class EaseMobService
      */
     public function createAccount($username, $nickname)
     {
-        return $this->hxCall->hx_register($username, $this->config['account_register_password'], $nickname);
+        $user = $this->hxCall->hx_user_info($username);
+
+        if (empty($user)) return $this->hxCall->hx_register($username, $this->config['account_register_password'], $nickname);
+        else return $user;
     }
 
     /**
@@ -50,6 +53,7 @@ class EaseMobService
      */
     public function updateNickname($username, $nickname)
     {
-        return $this->hxCall->hx_user_update_nickname($username, $nickname);
+        $user = $this->hxCall->hx_user_info($username);
+        if (!empty($user)) return $this->hxCall->hx_user_update_nickname($username, $nickname);
     }
 }

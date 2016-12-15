@@ -28,7 +28,7 @@ class HxCall
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret
         );
-        $rs = json_decode($this->curl($url, $data), true);
+        $rs = json_decode($this->curl($url, $data)->body, true);
         $this->token = $rs['access_token'];
 
     }
@@ -47,7 +47,7 @@ class HxCall
             'Content-Type'=>'application/json',
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, $data, $header, "POST");
+        return $this->curl($url, $data, $header, "POST")->body;
     }
     /*
      * 给IM用户的添加好友
@@ -58,7 +58,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "POST");
+        return $this->curl($url, "", $header, "POST")->body;
     }
     /*
      * 解除IM用户的好友关系
@@ -69,7 +69,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "DELETE");
+        return $this->curl($url, "", $header, "DELETE")->body;
     }
     /*
      * 查看好友
@@ -80,7 +80,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "GET");
+        return $this->curl($url, "", $header, "GET")->body;
     }
 
     /* 发送文本消息 */
@@ -105,7 +105,7 @@ class HxCall
                 'attr2' => "v2"
             )
         );
-        return $this->curl($url, $data, $header, "POST");
+        return $this->curl($url, $data, $header, "POST")->body;
     }
     /* 查询离线消息数 获取一个IM用户的离线消息数 */
     public function hx_msg_count($owner_username)
@@ -114,7 +114,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "GET");
+        return $this->curl($url, "", $header, "GET")->body;
     }
 
     /*
@@ -126,7 +126,9 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "GET");
+        $response = $this->curl($url, "", $header, "GET");
+        if ($response->status_code == 404) return null;
+        else return $response->body;
     }
     /*
      * 获取IM用户[批量]
@@ -137,7 +139,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "GET");
+        return $this->curl($url, "", $header, "GET")->body;
     }
     /*
      * 重置IM用户密码
@@ -149,7 +151,7 @@ class HxCall
             'Authorization'=>'Bearer ' . $this->token
         );
         $data['newpassword'] = $newpassword;
-        return $this->curl($url, $data, $header, "PUT");
+        return $this->curl($url, $data, $header, "PUT")->body;
     }
 
     /*
@@ -161,7 +163,7 @@ class HxCall
         $header = array(
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, "", $header, "DELETE");
+        return $this->curl($url, "", $header, "DELETE")->body;
     }
     /*
      * 修改用户昵称
@@ -173,7 +175,7 @@ class HxCall
             'Authorization'=>'Bearer ' . $this->token
         );
         $data['nickname'] = $nickname;
-        return $this->curl($url, $data, $header, "PUT");
+        return $this->curl($url, $data, $header, "PUT")->body;
     }
     /*
      *
@@ -185,6 +187,10 @@ class HxCall
 
         $response = null;
         switch ($method) {
+            case 'GET':
+                $response = Requests::post($url,$headers,json_encode($data));
+                break;
+
             case 'POST':
                 $response = Requests::post($url,$headers,json_encode($data));
                 break;
@@ -197,7 +203,7 @@ class HxCall
                 throw  new \Exception('未处理的HTTP METHOD', 500);
         }
 
-        return $response->body;
+        return $response;
     }
 }
 

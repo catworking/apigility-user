@@ -14,6 +14,7 @@ class IdentityResource extends ApigilityResource
 
     public function __construct(ServiceManager $services)
     {
+        parent::__construct($services);
         $this->identityService = $services->get('ApigilityUser\Service\IdentityService');
         $this->em = $services->get('Doctrine\ORM\EntityManager');
     }
@@ -33,8 +34,6 @@ class IdentityResource extends ApigilityResource
         } catch (\Exception $exception) {
             return new ApiProblem($exception->getCode(),$exception);
         }
-
-
     }
 
     /**
@@ -54,7 +53,16 @@ class IdentityResource extends ApigilityResource
         $doctrine_paginator = new DoctrineToolPaginator($query);
 
         $c = new IdentityCollection(new DoctrinePaginatorAdapter($doctrine_paginator));
-        //var_dump($c); exit();
+
+        if ($c->count() == 1) {
+            // 每次登录时者尝试创建环信帐号，防止注册时注册失败，后面将无法再创建
+            $config = $this->serviceManager->get('config');
+            if ($config['apigility-user']['ease-mob']['enable']) {
+                $identity = $c->getItem(0);
+                $this->serviceManager->get('ApigilityUser\Service\EaseMobService')->createAccount($identity->getId(), '用户'.$identity->getId());
+            }
+        }
+
         return $c;
     }
 
