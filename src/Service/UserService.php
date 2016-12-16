@@ -30,10 +30,16 @@ class UserService extends ApigilityEventAwareObject
 
     protected $services;
 
+    /**
+     * @var IdentityService
+     */
+    protected $identityService;
+
     public function __construct(ServiceManager $services)
     {
         $this->services = $services;
         $this->em = $services->get('Doctrine\ORM\EntityManager');
+        $this->identityService = $services->get('ApigilityUser\Service\IdentityService');
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->objectPropertyHydrator = new ObjectPropertyHydrator();
     }
@@ -47,6 +53,13 @@ class UserService extends ApigilityEventAwareObject
     {
         $user = new User();
         $user->setId($data->user_id);
+
+        if (isset($data->nickname)) $user->setNickname($data->nickname);
+        else {
+            $identity = $this->identityService->getIdentity($data->user_id);
+            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -1, 4);
+            $user->setNickname($nickname);
+        }
 
         $this->em->persist($user);
         $this->em->flush();
