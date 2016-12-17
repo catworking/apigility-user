@@ -13,7 +13,8 @@ return [
             'client_id'=>'',
             'client_secret'=>'',
             'server_url'=>'',
-            'account_register_password'=>''
+            'account_register_password'=>'',
+            'cache_path'=>''
         ],
     ],
     'zf-mvc-auth' => [

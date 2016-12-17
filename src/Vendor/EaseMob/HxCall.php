@@ -2,6 +2,7 @@
 namespace ApigilityUser\Vendor\EaseMob;
 
 use Requests;
+use Zend\Cache\Storage\Adapter\Filesystem as FilesystemCache;
 
 class HxCall
 {
@@ -12,6 +13,13 @@ class HxCall
     private $client_secret;
 
     private $url;
+
+    protected $tokenCache;
+    const TOKEN_CACHE_KEY = 'token';
+
+    protected $userCache;
+    const USER_CACHE_KEY_PREFIX = 'user_';
+
     /*
      * 获取APP管理员Token
      */
@@ -22,15 +30,34 @@ class HxCall
         $this->client_secret = isset($config['client_secret']) ? $config['client_secret'] : '';
         $this->url = isset($config['server_url']) ? $config['server_url'] : '';
 
-        $url = $this->url . "/token";
-        $data = array(
-            'grant_type' => 'client_credentials',
-            'client_id' => $this->client_id,
-            'client_secret' => $this->client_secret
-        );
-        $rs = json_decode($this->curl($url, $data)->body, true);
-        $this->token = $rs['access_token'];
+        if (!file_exists($config['cache_path'])) mkdir($config['cache_path'], 0777, true);
 
+        $this->tokenCache = new FilesystemCache([
+            'cache_dir'=>$config['cache_path'],
+            'namespace'=>'token',
+            'ttl'=>3600
+        ]);
+
+        $this->userCache = new FilesystemCache([
+            'cache_dir'=>$config['cache_path'],
+            'namespace'=>'user',
+            'ttl'=>36000
+        ]);
+
+        if ($this->tokenCache->hasItem(self::TOKEN_CACHE_KEY)) {
+            $this->token = $this->tokenCache->getItem(self::TOKEN_CACHE_KEY);
+        } else {
+            $url = $this->url . "/token";
+            $data = array(
+                'grant_type' => 'client_credentials',
+                'client_id' => $this->client_id,
+                'client_secret' => $this->client_secret
+            );
+            $rs = json_decode($this->curl($url, $data)->body, true);
+            $this->token = $rs['access_token'];
+
+            $this->tokenCache->addItem(self::TOKEN_CACHE_KEY, $this->token);
+        }
     }
     /*
      * 注册IM用户(授权注册)
@@ -47,7 +74,16 @@ class HxCall
             'Content-Type'=>'application/json',
             'Authorization'=>'Bearer ' . $this->token
         );
-        return $this->curl($url, $data, $header, "POST")->body;
+
+        $cache_key = self::USER_CACHE_KEY_PREFIX.$username;
+
+        $response = $this->curl($url, $data, $header, "POST");
+
+        if ($response->status_code == 200 && $this->userCache->hasItem($cache_key)) {
+            $this->userCache->setItem($cache_key, $response->body);
+        }
+
+        return $response->body;
     }
     /*
      * 给IM用户的添加好友
@@ -122,13 +158,27 @@ class HxCall
      */
     public function hx_user_info($username)
     {
-        $url = $this->url . "/users/${username}";
-        $header = array(
-            'Authorization'=>'Bearer ' . $this->token
-        );
-        $response = $this->curl($url, "", $header, "GET");
-        if ($response->status_code == 404) return null;
-        else return $response->body;
+        $cache_key = self::USER_CACHE_KEY_PREFIX.$username;
+
+        if ($this->userCache->hasItem($cache_key)) {
+            return $this->userCache->getItem($cache_key);
+        } else {
+            $url = $this->url . "/users/${username}";
+            $header = array(
+                'Authorization'=>'Bearer ' . $this->token
+            );
+            $response = $this->curl($url, "", $header, "GET");
+            if ($response->status_code == 404) {
+                $this->userCache->addItem($cache_key, '');
+                return null;
+            }
+            else {
+                $this->userCache->addItem($cache_key, $response->body);
+                return $response->body;
+            }
+        }
+
+
     }
     /*
      * 获取IM用户[批量]
