@@ -38,26 +38,22 @@ class Module implements ApigilityProviderInterface
     public function onBootstrap(MvcEvent $e)
     {
         // This method is called once the MVC bootstrapping is complete
-        if ($e->getName() == MvcEvent::EVENT_BOOTSTRAP) {
-            $application = $e->getApplication();
-            $services    = $application->getServiceManager();
+        $application = $e->getApplication();
+        $services    = $application->getServiceManager();
 
-            $application->getEventManager()->attach(MvcEvent::EVENT_ROUTE, function () use ($services){
-                $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
-                $userServiceEvents = $services->get('ApigilityUser\Service\UserService')->getEventManager();
+        $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
+        $userServiceEvents = $services->get('ApigilityUser\Service\UserService')->getEventManager();
 
-                // 创建用户对象
-                $user_listener = new UserListener($services);
-                $user_listener->attach($events);
+        // 创建用户对象
+        $user_listener = new UserListener($services);
+        $user_listener->attach($events);
 
-                // 创建环信帐号
-                $config = $services->get('config');
-                if ($config['apigility-user']['ease-mob']['enable']) {
-                    $easeMob_listener = new EaseMobListener($services);
-                    $easeMob_listener->attachToIdentityService($events);
-                    $easeMob_listener->attachToUserService($userServiceEvents);
-                }
-            });
+        // 创建环信帐号
+        $config = $services->get('config');
+        if ($config['apigility-user']['ease-mob']['enable']) {
+            $easeMob_listener = new EaseMobListener($services);
+            $easeMob_listener->attachToIdentityService($events);
+            $easeMob_listener->attachToUserService($userServiceEvents);
         }
     }
 }
