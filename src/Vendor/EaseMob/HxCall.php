@@ -34,12 +34,16 @@ class HxCall
 
         $this->tokenCache = new FilesystemCache([
             'cache_dir'=>$config['cache_path'],
+            'dir_permission'=>0777,
+            'file_permission'=>0777,
             'namespace'=>'token',
             'ttl'=>3600
         ]);
 
         $this->userCache = new FilesystemCache([
             'cache_dir'=>$config['cache_path'],
+            'dir_permission'=>0777,
+            'file_permission'=>0777,
             'namespace'=>'user',
             'ttl'=>36000
         ]);
