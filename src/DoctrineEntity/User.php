@@ -8,6 +8,7 @@
 
 namespace ApigilityUser\DoctrineEntity;
 
+use ApigilityAddress\DoctrineEntity\Address;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
@@ -155,19 +156,20 @@ class User
     protected $chinese_zodiac;
 
     /**
-     * 家庭住址
+     * 居住地址
      *
-     * @OneToOne(targetEntity="Address")
-     * @JoinColumn(name="home_address", referencedColumnName="id")
+     * @OneToOne(targetEntity="ApigilityAddress\DoctrineEntity\Address")
+     * @JoinColumn(name="residence_address_id", referencedColumnName="id")
      */
-    protected $home_address;
+    protected $residence_address;
 
     /**
-     * 用户类型
+     * 户口地址
      *
-     * @Column(type="string", length=50, nullable=true)
+     * @OneToOne(targetEntity="ApigilityAddress\DoctrineEntity\Address")
+     * @JoinColumn(name="census_register_address_id", referencedColumnName="id")
      */
-    protected $type;
+    protected $census_register_address;
 
     /**
      * 个人实名认证
@@ -182,6 +184,22 @@ class User
      * @OneToMany(targetEntity="ProfessionalCertification", mappedBy="user")
      */
     protected $professionalCertifications;
+
+    /**
+     * 职业
+     *
+     * @ManyToOne(targetEntity="Occupation", inversedBy="users")
+     * @JoinColumn(name="occupation_id", referencedColumnName="id")
+     */
+    protected $occupation;
+
+    /**
+     * 收入等级
+     *
+     * @ManyToOne(targetEntity="IncomeLevel", inversedBy="users")
+     * @JoinColumn(name="income_level_id", referencedColumnName="id")
+     */
+    protected $income_level;
 
     public function __construct()
     {
@@ -320,17 +338,6 @@ class User
         return $this->chinese_zodiac;
     }
 
-    public function setType($type)
-    {
-        $this->type = $type;
-        return $this;
-    }
-
-    public function getType()
-    {
-        return $this->type;
-    }
-
     public function setPersonalCertification($personalCertification)
     {
         $this->personalCertification = $personalCertification;
@@ -356,5 +363,61 @@ class User
     public function addProfessionalCertification($professionalCertification)
     {
         $this->professionalCertifications[] = $professionalCertification;
+    }
+
+    public function setOccupation($occupation)
+    {
+        $this->occupation = $occupation;
+        return $this;
+    }
+
+    /**
+     * @return Occupation
+     */
+    public function getOccupation()
+    {
+        return $this->occupation;
+    }
+
+    public function setIncomeLevel($income_level)
+    {
+        $this->income_level = $income_level;
+        return $this;
+    }
+
+    /**
+     * @return IncomeLevel
+     */
+    public function getIncomeLevel()
+    {
+        return $this->income_level;
+    }
+
+    public function setResidenceAddress($residence_address)
+    {
+        $this->residence_address = $residence_address;
+        return $this;
+    }
+
+    /**
+     * @return Address
+     */
+    public function getResidenceAddress()
+    {
+        return $this->residence_address;
+    }
+
+    public function setCensusRegisterAddress($census_register_address)
+    {
+        $this->census_register_address = $census_register_address;
+        return $this;
+    }
+
+    /**
+     * @return Address
+     */
+    public function getCensusRegisterAddress()
+    {
+        return $this->census_register_address;
     }
 }

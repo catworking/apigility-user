@@ -13,6 +13,8 @@ return [
             'ApigilityUser\Service\EaseMobService' => 'ApigilityUser\Service\EaseMobServiceFactory',
             'ApigilityUser\Service\PersonalCertificationService' => 'ApigilityUser\Service\PersonalCertificationServiceFactory',
             'ApigilityUser\Service\ProfessionalCertificationService' => 'ApigilityUser\Service\ProfessionalCertificationServiceFactory',
+            'ApigilityUser\Service\OccupationService' => 'ApigilityUser\Service\OccupationServiceFactory',
+            'ApigilityUser\Service\IncomeLevelService' => 'ApigilityUser\Service\IncomeLevelServiceFactory',
         ),
     )
 ];

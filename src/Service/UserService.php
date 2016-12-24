@@ -7,6 +7,7 @@
  */
 namespace ApigilityUser\Service;
 
+use ApigilityAddress\Service\AddressService;
 use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
 use ApigilityUser\DoctrineEntity\User;
 use Zend\EventManager\EventManagerAwareInterface;
@@ -35,11 +36,29 @@ class UserService extends ApigilityEventAwareObject
      */
     protected $identityService;
 
+    /**
+     * @var OccupationService
+     */
+    protected $occupationService;
+
+    /**
+     * @var IncomeLevelService
+     */
+    protected $incomeLevelService;
+
+    /**
+     * @var AddressService
+     */
+    protected $addressService;
+
     public function __construct(ServiceManager $services)
     {
         $this->services = $services;
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->identityService = $services->get('ApigilityUser\Service\IdentityService');
+        $this->occupationService = $services->get('ApigilityUser\Service\OccupationService');
+        $this->incomeLevelService = $services->get('ApigilityUser\Service\IncomeLevelService');
+        $this->addressService = $services->get('ApigilityAddress\Service\AddressService');
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->objectPropertyHydrator = new ObjectPropertyHydrator();
     }
@@ -54,12 +73,7 @@ class UserService extends ApigilityEventAwareObject
         $user = new User();
         $user->setId($data->user_id);
 
-        if (isset($data->nickname)) $user->setNickname($data->nickname);
-        else {
-            $identity = $this->identityService->getIdentity($data->user_id);
-            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -1, 4);
-            $user->setNickname($nickname);
-        }
+        $this->hydrateUserData($user, $data);
 
         $this->em->persist($user);
         $this->em->flush();
@@ -73,7 +87,7 @@ class UserService extends ApigilityEventAwareObject
      * 获取单个用户信息
      *
      * @param $user_id
-     * @return mixed
+     * @return \ApigilityUser\DoctrineEntity\User
      * @throws Exception\UserNotExistException
      */
     public function getUser($user_id)
@@ -94,13 +108,8 @@ class UserService extends ApigilityEventAwareObject
     public function updateUser($user_id, $data)
     {
         $user = $this->getUser($user_id);
-        if (isset($data->birthday)) {
-            $datetime = new \DateTime();
-            $datetime->setTimestamp($data->birthday);
-            $data->birthday = $datetime;
-        }
 
-        $this->classMethodsHydrator->hydrate($this->objectPropertyHydrator->extract($data), $user);
+        $this->hydrateUserData($user, $data);
 
         $this->em->flush();
 
@@ -120,5 +129,40 @@ class UserService extends ApigilityEventAwareObject
     {
         $this->authIdentity = $this->services->get('api-identity');
         return  $this->getUser($this->authIdentity->getRoleId());
+    }
+
+    /**
+     * @param User $user
+     * @param $data
+     */
+    private function hydrateUserData(User $user, $data)
+    {
+        if (isset($data->nickname)) $user->setNickname($data->nickname);
+        else {
+            $identity = $this->identityService->getIdentity($data->user_id);
+            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -1, 4);
+            $user->setNickname($nickname);
+        }
+
+        if (isset($data->avatar)) $user->setAvatar($data->avatar);
+        if (isset($data->sex)) $user->setSex($data->sex);
+        if (isset($data->age)) $user->setAge($data->age);
+        if (isset($data->stature)) $user->setStature($data->stature);
+        if (isset($data->weight)) $user->setWeight($data->weight);
+        if (isset($data->education)) $user->setEducation($data->education);
+        if (isset($data->emotion)) $user->setEmotion($data->emotion);
+        if (isset($data->zodiac)) $user->setZodiac($data->zodiac);
+        if (isset($data->chinese_zodiac)) $user->setChineseZodiac($data->chinese_zodiac);
+
+        if (isset($data->birthday)) {
+            $datetime = new \DateTime();
+            $datetime->setTimestamp($data->birthday);
+            $user->setBirthday($datetime);
+        }
+
+        if (isset($data->income_level)) $user->setIncomeLevel($this->incomeLevelService->getIncomeLevel($data->income_level));
+        if (isset($data->occupation)) $user->setOccupation($this->occupationService->getOccupation($data->occupation));
+        if (isset($data->residence_address)) $user->setResidenceAddress($this->addressService->getAddress($data->residence_address));
+        if (isset($data->census_register_address)) $user->setCensusRegisterAddress($this->addressService->getAddress($data->census_register_address));
     }
 }
