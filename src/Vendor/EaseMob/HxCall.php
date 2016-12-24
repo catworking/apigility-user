@@ -30,7 +30,11 @@ class HxCall
         $this->client_secret = isset($config['client_secret']) ? $config['client_secret'] : '';
         $this->url = isset($config['server_url']) ? $config['server_url'] : '';
 
-        if (!file_exists($config['cache_path'])) mkdir($config['cache_path'], 0777, true);
+        if (!file_exists($config['cache_path'])) {
+            $old_mask = umask(0);
+            mkdir($config['cache_path'], 0777, true);
+            umask($old_mask);
+        }
 
         $this->tokenCache = new FilesystemCache([
             'cache_dir'=>$config['cache_path'],
