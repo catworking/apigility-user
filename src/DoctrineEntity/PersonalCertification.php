@@ -44,14 +44,25 @@ class PersonalCertification
     protected $identity_card_number;
 
     /**
+     * 身份证正面图
+     *
      * @Column(type="string", length=255, nullable=true)
      */
     protected $identity_card_image_front;
 
     /**
+     * 身份证背面图
+     *
      * @Column(type="string", length=255, nullable=true)
      */
     protected $identity_card_image_back;
+
+    /**
+     * 手持身份证照片
+     *
+     * @Column(type="string", length=255, nullable=true)
+     */
+    protected $holding_identity_card_image;
 
     /**
      * 用户
@@ -112,6 +123,17 @@ class PersonalCertification
     public function getIdentityCardImageBack()
     {
         return $this->identity_card_image_back;
+    }
+
+    public function setHoldingIdentityCardImage($holding_identity_card_image)
+    {
+        $this->holding_identity_card_image = $holding_identity_card_image;
+        return $this;
+    }
+
+    public function getHoldingIdentityCardImage()
+    {
+        return $this->holding_identity_card_image;
     }
 
     public function setUser($user)

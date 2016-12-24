@@ -34,9 +34,9 @@ class ProfessionalCertificationService
     {
         $professionalCertification = new DoctrineEntity\ProfessionalCertification();
         $professionalCertification->setStatus($professionalCertification::STATUS_NOT_REVIEW);
-        $professionalCertification->setIdentityCardNumber($data->identity_card_number);
-        $professionalCertification->setCertificationImageFront($data->certification_image_front);
-        $professionalCertification->setCertificationImageBack($data->certification_image_back);
+        if (isset($data->identity_card_number)) $professionalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->certification_image_front)) $professionalCertification->setCertificationImageFront($data->certification_image_front);
+        if (isset($data->certification_image_back)) $professionalCertification->setCertificationImageBack($data->certification_image_back);
         $professionalCertification->setUser($user);
 
         $this->em->persist($professionalCertification);

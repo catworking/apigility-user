@@ -34,9 +34,10 @@ class PersonalCertificationService
     {
         $personalCertification = new DoctrineEntity\PersonalCertification();
         $personalCertification->setStatus($personalCertification::STATUS_NOT_REVIEW);
-        $personalCertification->setIdentityCardNumber($data->identity_card_number);
-        $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
-        $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->identity_card_number)) $personalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
+        if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
         $personalCertification->setUser($user);
 
         $this->em->persist($personalCertification);
