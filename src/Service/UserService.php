@@ -73,6 +73,13 @@ class UserService extends ApigilityEventAwareObject
         $user = new User();
         $user->setId($data->user_id);
 
+        if (isset($data->nickname)) $user->setNickname($data->nickname);
+        else {
+            $identity = $this->identityService->getIdentity($data->user_id);
+            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -4, 4);
+            $user->setNickname($nickname);
+        }
+
         $this->hydrateUserData($user, $data);
 
         $this->em->persist($user);
@@ -138,12 +145,6 @@ class UserService extends ApigilityEventAwareObject
     private function hydrateUserData(User $user, $data)
     {
         if (isset($data->nickname)) $user->setNickname($data->nickname);
-        else {
-            $identity = $this->identityService->getIdentity($data->user_id);
-            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -1, 4);
-            $user->setNickname($nickname);
-        }
-
         if (isset($data->avatar)) $user->setAvatar($data->avatar);
         if (isset($data->sex)) $user->setSex($data->sex);
         if (isset($data->age)) $user->setAge($data->age);
