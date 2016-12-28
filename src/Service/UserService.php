@@ -110,7 +110,7 @@ class UserService extends ApigilityEventAwareObject
      *
      * @param $user_id
      * @param $data
-     * @return mixed
+     * @return User
      */
     public function updateUser($user_id, $data)
     {
