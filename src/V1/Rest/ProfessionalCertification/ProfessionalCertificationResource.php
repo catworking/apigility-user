@@ -33,4 +33,13 @@ class ProfessionalCertificationResource extends ApigilityResource
             return new ApiProblem($exception->getCode(), $exception->getMessage());
         }
     }
+
+    public function patch($id, $data)
+    {
+        try {
+            return new ProfessionalCertificationEntity($this->professionalCertificationService->updateProfessionalCertification($id, $data), $this->serviceManager);
+        } catch (\Exception $exception) {
+            return new ApiProblem($exception->getCode(), $exception->getMessage());
+        }
+    }
 }

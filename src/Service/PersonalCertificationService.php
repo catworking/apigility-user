@@ -62,6 +62,21 @@ class PersonalCertificationService
         return new DoctrinePaginatorAdapter($doctrine_paginator);
     }
 
+    public function updatePersonalCertification($personal_certification_id, $data)
+    {
+        $personalCertification = $this->getPersonalCertification($personal_certification_id);
+
+        $personalCertification->setStatus(DoctrineEntity\PersonalCertification::STATUS_NOT_REVIEW);
+        if (isset($data->identity_card_number)) $personalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
+        if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
+
+        $this->em->flush();
+
+        return $personalCertification;
+    }
+
     public function deletePersonalCertification($personal_certification_id)
     {
         $personalCertification = $this->getPersonalCertification($personal_certification_id);

@@ -2,6 +2,7 @@
 namespace ApigilityUser\V1\Rest\ProfessionalCertification;
 
 use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use ApigilityUser\DoctrineEntity\User;
 
 class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 {
@@ -96,7 +97,8 @@ class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getUser()
     {
-        return $this->user;
+        if ($this->user instanceof User) return (object)[];
+        else return $this->user;
     }
 
     public function setStatus($status)

@@ -61,6 +61,19 @@ class ProfessionalCertificationService
         return new DoctrinePaginatorAdapter($doctrine_paginator);
     }
 
+    public function updateProfessionalCertification($professional_certification_id, $data)
+    {
+        $professionalCertification = $this->getProfessionalCertification($professional_certification_id);
+
+        $professionalCertification->setStatus($professionalCertification::STATUS_NOT_REVIEW);
+        if (isset($data->identity_card_number)) $professionalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->certification_image_front)) $professionalCertification->setCertificationImageFront($data->certification_image_front);
+        if (isset($data->certification_image_back)) $professionalCertification->setCertificationImageBack($data->certification_image_back);
+
+        $this->em->flush();
+        return $professionalCertification;
+    }
+
     public function deleteProfessionalCertification($professional_certification_id)
     {
         $professionalCertification = $this->getProfessionalCertification($professional_certification_id);

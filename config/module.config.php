@@ -125,7 +125,9 @@ return [
             'route_name' => 'apigility-user.rest.personal-certification',
             'route_identifier_name' => 'personal_certification_id',
             'collection_name' => 'personal_certification',
-            'entity_http_methods' => [],
+            'entity_http_methods' => [
+                0 => 'PATCH',
+            ],
             'collection_http_methods' => [
                 0 => 'POST',
             ],
@@ -141,7 +143,9 @@ return [
             'route_name' => 'apigility-user.rest.professional-certification',
             'route_identifier_name' => 'professional_certification_id',
             'collection_name' => 'professional_certification',
-            'entity_http_methods' => [],
+            'entity_http_methods' => [
+                0 => 'PATCH',
+            ],
             'collection_http_methods' => [
                 0 => 'POST',
             ],
@@ -633,6 +637,17 @@ return [
                 'field_type' => 'string',
                 'allow_empty' => true,
                 'continue_if_empty' => true,
+            ],
+            4 => [
+                'required' => false,
+                'validators' => [],
+                'filters' => [],
+                'name' => 'holding_identity_card_image',
+                'description' => '手持身份证照片',
+                'field_type' => 'string',
+                'allow_empty' => true,
+                'continue_if_empty' => true,
+                'error_message' => '请输入手持身份证照片',
             ],
         ],
         'ApigilityUser\\V1\\Rest\\ProfessionalCertification\\Validator' => [
