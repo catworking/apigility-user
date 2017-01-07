@@ -76,7 +76,9 @@ class UserService extends ApigilityEventAwareObject
         if (isset($data->nickname)) $user->setNickname($data->nickname);
         else {
             $identity = $this->identityService->getIdentity($data->user_id);
-            $nickname = '用户'.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -4, 4);
+            $nickname = '用户';
+            if (!empty($identity->getPhone())) $nickname = $nickname.substr($identity->getPhone(), 0, 3).'****'.substr($identity->getPhone(), -4, 4);
+            else $nickname = $nickname.$identity->getId();
             $user->setNickname($nickname);
         }
 

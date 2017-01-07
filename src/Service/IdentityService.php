@@ -16,7 +16,14 @@ class IdentityService extends ApigilityEventAwareObject
 {
     const EVENT_IDENTITY_CREATED = 'IdentityService.EventIdentityCreated';
 
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
     protected $em;
+
+    /**
+     * @var \ApigilityOauth2Adapter\OauthUserManager
+     */
     protected $oauthUserManager;
 
     public function __construct(ServiceManager $services)
@@ -46,12 +53,8 @@ class IdentityService extends ApigilityEventAwareObject
      */
     public function identityExist($condition)
     {
-        $dql = "SELECT i FROM ApigilityUser\\DoctrineEntity\\Identity i WHERE i.phone=?1";
-        $rs = $this->em->createQuery($dql)
-            ->setParameter(1, $condition['phone'])
-            ->getResult();
-
-        if (count($rs)) return true;
+        $identities = $this->em->getRepository('ApigilityUser\DoctrineEntity\Identity')->findBy($condition);
+        if (count($identities)) return true;
         else return false;
     }
 
@@ -65,29 +68,32 @@ class IdentityService extends ApigilityEventAwareObject
      */
     public function createIdentity($data)
     {
-        if (!$this->identityExist(array(
-            'phone'=>$data->phone // 检查手机号是否已经注册
-        ))) {
-            // 创建认证用户
-            $oauth_user = $this->oauthUserManager->createUser($data->password);
+        // 检查手机号是否已经注册
+        if (isset($data->phone)) {
+            $condition = ['phone'=>$data->phone];
+            if (isset($data->type)) $condition['type'] = $data->type;
 
-            $identity = new Identity();
-            $identity->setId($oauth_user->getUsername());
-            $identity->setPhone($data->phone);
-            if (isset($data->type)) $identity->setType($data->type);
-
-            $this->em->persist($identity);
-            $this->em->flush();
-
-            // 触发标识已创建事件
-            $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, [
-                'user_id' => $identity->getId(),
-                'password'=>$data->password
-            ]);
-            return $identity;
-        } else {
-            throw new Exception\PhoneExistException();
+            if ($this->identityExist($condition)) throw new Exception\PhoneExistException();
         }
+
+        // 创建认证用户
+        $oauth_user = $this->oauthUserManager->createUser($data->password);
+
+        $identity = new Identity();
+        $identity->setId($oauth_user->getUsername());
+        if (isset($data->phone)) $identity->setPhone($data->phone);
+        if (isset($data->type)) $identity->setType($data->type);
+
+        $this->em->persist($identity);
+        $this->em->flush();
+
+        // 触发标识已创建事件
+        $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, [
+            'user_id' => $identity->getId(),
+            'password'=>$data->password
+        ]);
+
+        return $identity;
     }
 
     /**
