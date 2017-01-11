@@ -8,13 +8,17 @@
 namespace ApigilityUser\Service;
 
 use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
+use Doctrine\ORM\QueryBuilder;
 use Zend\ServiceManager\ServiceManager;
 use ApigilityUser\DoctrineEntity\Identity;
 use ApigilityUser\UserListener;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineToolPaginator;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAdapter;
 
 class IdentityService extends ApigilityEventAwareObject
 {
     const EVENT_IDENTITY_CREATED = 'IdentityService.EventIdentityCreated';
+    const EVENT_GETTING_IDENTITIES = 'IdentityService.EVENT_GETTING_IDENTITIES';
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -26,10 +30,16 @@ class IdentityService extends ApigilityEventAwareObject
      */
     protected $oauthUserManager;
 
+    /**
+     * @var ServiceManager
+     */
+    protected $serviceManager;
+
     public function __construct(ServiceManager $services)
     {
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->oauthUserManager = $services->get('ApigilityOauth2Adapter\OauthUserManager');
+        $this->serviceManager = $services;
     }
 
     /**
@@ -120,5 +130,40 @@ class IdentityService extends ApigilityEventAwareObject
         }
 
         return $identity;
+    }
+
+    public function getIdentities($params)
+    {
+        $qb = new QueryBuilder($this->em);
+        $qb->select('i')->from('ApigilityUser\DoctrineEntity\Identity', 'i');
+
+        $where = '';
+
+        if (isset($params->phone)) {
+            if (!empty($where)) $where .= ' AND ';
+            $where .= 'i.phone = :phone';
+        }
+
+        if (isset($params->type)) {
+            if (!empty($where)) $where .= ' AND ';
+            $where .= 'i.type = :type';
+        }
+
+        if (!empty($where)) {
+            $qb->where($where);
+
+            if (isset($params->phone)) $qb->setParameter('phone', $params->phone);
+            if (isset($params->type)) $qb->setParameter('type', $params->type);
+        }
+
+        $doctrine_paginator = new DoctrineToolPaginator($qb->getQuery());
+        $doctrine_paginator_adapter = new DoctrinePaginatorAdapter($doctrine_paginator);
+
+        // 触发查找标识列表事件
+        $this->getEventManager()->trigger(self::EVENT_GETTING_IDENTITIES, $this, [
+            'doctrine_paginator_adapter' => $doctrine_paginator_adapter
+        ]);
+
+        return $doctrine_paginator_adapter;
     }
 }
