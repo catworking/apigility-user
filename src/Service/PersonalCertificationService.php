@@ -7,6 +7,7 @@
  */
 namespace ApigilityUser\Service;
 
+use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
 use ApigilityUser\DoctrineEntity\User;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
@@ -15,8 +16,10 @@ use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineToolPaginator;
 use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAdapter;
 use ApigilityUser\DoctrineEntity;
 
-class PersonalCertificationService
+class PersonalCertificationService extends ApigilityEventAwareObject
 {
+    const EVENT_STATUS_SWITCH_TO_OK = 'PersonalCertificationService.EVENT_STATUS_SWITCH_TO_OK';
+
     protected $classMethodsHydrator;
 
     /**
@@ -30,6 +33,11 @@ class PersonalCertificationService
         $this->em = $services->get('Doctrine\ORM\EntityManager');
     }
 
+    /**
+     * @param $data
+     * @param User $user
+     * @return DoctrineEntity\PersonalCertification
+     */
     public function createPersonalCertification($data, User $user)
     {
         $personalCertification = new DoctrineEntity\PersonalCertification();
@@ -46,6 +54,11 @@ class PersonalCertificationService
         return $personalCertification;
     }
 
+    /**
+     * @param $personal_certification_id
+     * @return DoctrineEntity\PersonalCertification
+     * @throws \Exception
+     */
     public function getPersonalCertification($personal_certification_id)
     {
         $personalCertification = $this->em->find('ApigilityUser\DoctrineEntity\PersonalCertification', $personal_certification_id);
@@ -62,17 +75,31 @@ class PersonalCertificationService
         return new DoctrinePaginatorAdapter($doctrine_paginator);
     }
 
+    /**
+     * @param $personal_certification_id
+     * @param $data
+     * @return DoctrineEntity\PersonalCertification
+     */
     public function updatePersonalCertification($personal_certification_id, $data)
     {
         $personalCertification = $this->getPersonalCertification($personal_certification_id);
 
-        $personalCertification->setStatus(DoctrineEntity\PersonalCertification::STATUS_NOT_REVIEW);
+        if (isset($data->status)) {
+            $personalCertification->setStatus($data->status);
+        } else {
+            $personalCertification->setStatus(DoctrineEntity\PersonalCertification::STATUS_NOT_REVIEW);
+        }
         if (isset($data->identity_card_number)) $personalCertification->setIdentityCardNumber($data->identity_card_number);
         if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
         if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
         if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
 
         $this->em->flush();
+
+        if (isset($data->status) && $data->status == DoctrineEntity\PersonalCertification::STATUS_REVIEWED_OK) {
+            // 触发审核通过事件
+            $this->getEventManager()->trigger(self::EVENT_STATUS_SWITCH_TO_OK, $this, ['personal_certification' => $personalCertification]);
+        }
 
         return $personalCertification;
     }
