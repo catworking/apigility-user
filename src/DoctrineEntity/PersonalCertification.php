@@ -142,6 +142,9 @@ class PersonalCertification
         return $this;
     }
 
+    /**
+     * @return User
+     */
     public function getUser()
     {
         return $this->user;

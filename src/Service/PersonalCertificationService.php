@@ -27,10 +27,16 @@ class PersonalCertificationService extends ApigilityEventAwareObject
      */
     protected $em;
 
+    /**
+     * @var \ApigilityCommunicate\Service\NotificationService
+     */
+    protected $notificationService;
+
     public function __construct(ServiceManager $services)
     {
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->em = $services->get('Doctrine\ORM\EntityManager');
+        $this->notificationService = $services->get('ApigilityCommunicate\Service\NotificationService');
     }
 
     /**
@@ -95,6 +101,31 @@ class PersonalCertificationService extends ApigilityEventAwareObject
         if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
 
         $this->em->flush();
+
+        if (isset($data->status)) {
+            $content = null;
+
+            switch ($data->status) {
+                case DoctrineEntity\PersonalCertification::STATUS_REVIEWED_OK:
+                    $content = '您的实名认证已审核通过';
+                    break;
+
+                case DoctrineEntity\PersonalCertification::STATUS_REVIEWED_REJECT:
+                    $content = '您的实名认证信息没有通过审核，请重新上传认证资料';
+                    break;
+            }
+
+            // 发送用户通知
+            if (!empty($content)) {
+                $this->notificationService->createNotification((object)[
+                    'user_id' => $personalCertification->getUser()->getId(),
+                    'title'   => '实名认证',
+                    'content' => $content,
+                    'type'    => 'User.PersonalCertification',
+                    'object_id' => $personalCertification->getId()
+                ], true);
+            }
+        }
 
         if (isset($data->status) && $data->status == DoctrineEntity\PersonalCertification::STATUS_REVIEWED_OK) {
             // 触发审核通过事件
