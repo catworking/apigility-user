@@ -42,9 +42,11 @@ class Module implements ApigilityProviderInterface
         $services    = $application->getServiceManager();
 
         $events = $services->get('ApigilityUser\Service\IdentityService')->getEventManager();
+        $personalCertificationServiceEvents = $services->get('ApigilityUser\Service\PersonalCertificationService')->getEventManager();
 
         // 创建用户对象
         $user_listener = new UserListener($services);
         $user_listener->attach($events);
+        $user_listener->attachToPersonalCertificationService($personalCertificationServiceEvents);
     }
 }
