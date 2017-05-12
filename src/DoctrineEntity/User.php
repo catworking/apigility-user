@@ -201,6 +201,17 @@ class User
      */
     protected $income_level;
 
+    /**
+     * Oauth2认证token
+     *
+     * @ManyToMany(targetEntity="ApigilityOauth2Adapter\DoctrineEntity\OauthAccessToken")
+     * @JoinTable(name="user_has_tokens",
+     *      joinColumns={@JoinColumn(name="user_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@JoinColumn(name="access_token", referencedColumnName="access_token", unique=true)}
+     *      )
+     */
+    protected $tokens;
+
     public function __construct()
     {
         $this->professionalCertifications = new ArrayCollection();
