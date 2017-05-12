@@ -203,18 +203,14 @@ class User
 
     /**
      * Oauth2认证token
-     *
-     * @ManyToMany(targetEntity="ApigilityOauth2Adapter\DoctrineEntity\OauthAccessToken")
-     * @JoinTable(name="user_has_tokens",
-     *      joinColumns={@JoinColumn(name="user_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@JoinColumn(name="access_token", referencedColumnName="access_token", unique=true)}
-     *      )
+     * @OneToMany(targetEntity="ApigilityOauth2Adapter\DoctrineEntity\OauthAccessToken", mappedBy="user")
      */
     protected $tokens;
 
     public function __construct()
     {
         $this->professionalCertifications = new ArrayCollection();
+        $this->tokens = new ArrayCollection();
     }
 
     public function setId($id)
@@ -430,5 +426,16 @@ class User
     public function getCensusRegisterAddress()
     {
         return $this->census_register_address;
+    }
+
+    public function setTokens($tokens)
+    {
+        $this->tokens = $tokens;
+        return $this;
+    }
+
+    public function getTokens()
+    {
+        return $this->tokens;
     }
 }

@@ -144,6 +144,8 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
      */
     protected $income_level;
 
+    protected $tokens;
+
     public function setId($id)
     {
         $this->id = $id;
@@ -357,5 +359,16 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
     {
         if ($this->census_register_address instanceof Address) return $this->hydrator->extract(new AddressEntity($this->census_register_address));
         else return $this->census_register_address;
+    }
+
+    public function setTokens($tokens)
+    {
+        $this->tokens = $tokens;
+        return $this;
+    }
+
+    public function getTokens()
+    {
+        return $this->tokens->count();
     }
 }
