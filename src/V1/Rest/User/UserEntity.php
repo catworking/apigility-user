@@ -371,4 +371,10 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
     {
         return $this->tokens->count();
     }
+
+    public function getIdentity()
+    {
+        $identity = $this->serviceManager->get('ApigilityUser\Service\IdentityService')->getIdentity($this->id);
+        return $this->hydrator->extract($identity);
+    }
 }
