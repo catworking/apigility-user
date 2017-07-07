@@ -26,7 +26,7 @@ class Identity
     protected $id;
 
     /**
-     * @Column(type="string", unique=true)
+     * @Column(type="string", length=50, nullable=true)
      */
     protected $phone;
 

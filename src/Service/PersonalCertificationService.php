@@ -7,6 +7,7 @@
  */
 namespace ApigilityUser\Service;
 
+use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
 use ApigilityUser\DoctrineEntity\User;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
@@ -15,8 +16,10 @@ use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineToolPaginator;
 use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAdapter;
 use ApigilityUser\DoctrineEntity;
 
-class PersonalCertificationService
+class PersonalCertificationService extends ApigilityEventAwareObject
 {
+    const EVENT_STATUS_SWITCH_TO_OK = 'PersonalCertificationService.EVENT_STATUS_SWITCH_TO_OK';
+
     protected $classMethodsHydrator;
 
     /**
@@ -24,19 +27,44 @@ class PersonalCertificationService
      */
     protected $em;
 
+    /**
+     * @var \ApigilityCommunicate\Service\NotificationService
+     */
+    protected $notificationService;
+
     public function __construct(ServiceManager $services)
     {
         $this->classMethodsHydrator = new ClassMethodsHydrator();
         $this->em = $services->get('Doctrine\ORM\EntityManager');
+        $this->notificationService = $services->get('ApigilityCommunicate\Service\NotificationService');
     }
 
+    /**
+     * @param $data
+     * @param User $user
+     * @return DoctrineEntity\PersonalCertification
+     */
     public function createPersonalCertification($data, User $user)
     {
         $personalCertification = new DoctrineEntity\PersonalCertification();
         $personalCertification->setStatus($personalCertification::STATUS_NOT_REVIEW);
-        $personalCertification->setIdentityCardNumber($data->identity_card_number);
-        $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
-        $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->identity_card_number)) {
+            $personalCertification->setIdentityCardNumber($data->identity_card_number);
+
+            // 设置用户的性别和年龄
+            $result = file_get_contents('http://apis.juhe.cn/idcard/index?cardno=' . $data->identity_card_number . '&dtype=json&key=619781682bbaa5576f8fe7fc3ff5abe3');
+            $result = json_decode($result, true);
+            if (!is_array($result['result'])) {
+                throw new \Exception($result['reason'], 404);
+            }
+            $user->setSex($result['result']['sex'] == '男' ? User::SEX_MALE : User::SEX_FEMALE);
+            $bir_year = substr($result['result']['birthday'], 0, 4);
+            $year = date('Y');
+            $user->setAge($year - $bir_year);
+        }
+        if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
+        if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
         $personalCertification->setUser($user);
 
         $this->em->persist($personalCertification);
@@ -45,6 +73,11 @@ class PersonalCertificationService
         return $personalCertification;
     }
 
+    /**
+     * @param $personal_certification_id
+     * @return DoctrineEntity\PersonalCertification
+     * @throws \Exception
+     */
     public function getPersonalCertification($personal_certification_id)
     {
         $personalCertification = $this->em->find('ApigilityUser\DoctrineEntity\PersonalCertification', $personal_certification_id);
@@ -59,6 +92,60 @@ class PersonalCertificationService
 
         $doctrine_paginator = new DoctrineToolPaginator($qb->getQuery());
         return new DoctrinePaginatorAdapter($doctrine_paginator);
+    }
+
+    /**
+     * @param $personal_certification_id
+     * @param $data
+     * @return DoctrineEntity\PersonalCertification
+     */
+    public function updatePersonalCertification($personal_certification_id, $data)
+    {
+        $personalCertification = $this->getPersonalCertification($personal_certification_id);
+
+        if (isset($data->status)) {
+            $personalCertification->setStatus($data->status);
+        } else {
+            $personalCertification->setStatus(DoctrineEntity\PersonalCertification::STATUS_NOT_REVIEW);
+        }
+        if (isset($data->identity_card_number)) $personalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
+        if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
+        if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
+
+        $this->em->flush();
+
+        if (isset($data->status)) {
+            $content = null;
+
+            switch ($data->status) {
+                case DoctrineEntity\PersonalCertification::STATUS_REVIEWED_OK:
+                    $content = '您的实名认证已审核通过';
+                    break;
+
+                case DoctrineEntity\PersonalCertification::STATUS_REVIEWED_REJECT:
+                    $content = '您的实名认证信息没有通过审核，请重新上传认证资料';
+                    break;
+            }
+
+            // 发送用户通知
+            if (!empty($content)) {
+                $this->notificationService->createNotification((object)[
+                    'user_id' => $personalCertification->getUser()->getId(),
+                    'title'   => '实名认证',
+                    'content' => $content,
+                    'type'    => 'User.PersonalCertification',
+                    'object_id' => $personalCertification->getId()
+                ], true);
+            }
+        }
+
+        if (isset($data->status) && $data->status == DoctrineEntity\PersonalCertification::STATUS_REVIEWED_OK) {
+            // 触发审核通过事件
+            $this->getEventManager()->trigger(self::EVENT_STATUS_SWITCH_TO_OK, $this, ['personal_certification' => $personalCertification]);
+        }
+
+        return $personalCertification;
     }
 
     public function deletePersonalCertification($personal_certification_id)

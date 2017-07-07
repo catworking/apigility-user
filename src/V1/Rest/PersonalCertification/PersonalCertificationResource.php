@@ -33,4 +33,13 @@ class PersonalCertificationResource extends ApigilityResource
             return new ApiProblem($exception->getCode(), $exception->getMessage());
         }
     }
+
+    public function patch($id, $data)
+    {
+        try {
+            return new PersonalCertificationEntity($this->personalCertificationService->updatePersonalCertification($id, $data), $this->serviceManager);
+        } catch (\Exception $exception) {
+            return new ApiProblem($exception->getCode(), $exception->getMessage());
+        }
+    }
 }

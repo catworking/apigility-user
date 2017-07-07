@@ -9,6 +9,9 @@ use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAd
 
 class IdentityResource extends ApigilityResource
 {
+    /**
+     * @var \ApigilityUser\Service\IdentityService
+     */
     protected $identityService;
     protected $em;
 
@@ -44,26 +47,11 @@ class IdentityResource extends ApigilityResource
      */
     public function fetchAll($params = [])
     {
-        $dql = "SELECT i FROM ApigilityUser\\DoctrineEntity\\Identity i WHERE i.phone=?1";
-        $query = $this->em->createQuery($dql)
-            ->setParameter(1, $params->phone)
-            ->setFirstResult(0)
-            ->setMaxResults(100);
-
-        $doctrine_paginator = new DoctrineToolPaginator($query);
-
-        $c = new IdentityCollection(new DoctrinePaginatorAdapter($doctrine_paginator));
-
-        if ($c->count() == 1) {
-            // 每次登录时者尝试创建环信帐号，防止注册时注册失败，后面将无法再创建
-            $config = $this->serviceManager->get('config');
-            if ($config['apigility-user']['ease-mob']['enable']) {
-                $identity = $c->getItem(0);
-                $this->serviceManager->get('ApigilityUser\Service\EaseMobService')->createAccount($identity->getId(), '用户'.$identity->getId());
-            }
+        try {
+            return new IdentityCollection($this->identityService->getIdentities($params));
+        } catch (\Exception $exception) {
+            return new ApiProblem($exception->getCode(), $exception->getMessage());
         }
-
-        return $c;
     }
 
     /**

@@ -1,8 +1,14 @@
 <?php
 namespace ApigilityUser\V1\Rest\User;
 
+use ApigilityAddress\DoctrineEntity\Address;
+use ApigilityAddress\V1\Rest\Address\AddressEntity;
 use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use ApigilityUser\DoctrineEntity\IncomeLevel;
+use ApigilityUser\DoctrineEntity\Occupation;
 use ApigilityUser\DoctrineEntity\PersonalCertification;
+use ApigilityUser\V1\Rest\IncomeLevel\IncomeLevelEntity;
+use ApigilityUser\V1\Rest\Occupation\OccupationEntity;
 use ApigilityUser\V1\Rest\PersonalCertification\PersonalCertificationEntity;
 use ApigilityUser\V1\Rest\ProfessionalCertification\ProfessionalCertificationEntity;
 
@@ -93,19 +99,20 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
     protected $chinese_zodiac;
 
     /**
-     * 家庭住址
+     * 居住地址
      *
-     * @OneToOne(targetEntity="Address")
-     * @JoinColumn(name="home_address", referencedColumnName="id")
+     * @OneToOne(targetEntity="ApigilityAddress\DoctrineEntity\Address")
+     * @JoinColumn(name="residence_address_id", referencedColumnName="id")
      */
-    protected $home_address;
+    protected $residence_address;
 
     /**
-     * 用户类型
+     * 户口地址
      *
-     * @Column(type="string", length=50, nullable=true)
+     * @OneToOne(targetEntity="ApigilityAddress\DoctrineEntity\Address")
+     * @JoinColumn(name="census_register_address_id", referencedColumnName="id")
      */
-    protected $type;
+    protected $census_register_address;
 
     /**
      * 个人实名认证
@@ -120,6 +127,24 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
      * @OneToMany(targetEntity="ProfessionalCertification", mappedBy="user")
      */
     protected $professionalCertifications;
+
+    /**
+     * 职业
+     *
+     * @ManyToOne(targetEntity="Occupation", inversedBy="users")
+     * @JoinColumn(name="occupation_id", referencedColumnName="id")
+     */
+    protected $occupation;
+
+    /**
+     * 收入等级
+     *
+     * @ManyToOne(targetEntity="IncomeLevel", inversedBy="users")
+     * @JoinColumn(name="income_level_id", referencedColumnName="id")
+     */
+    protected $income_level;
+
+    protected $tokens;
 
     public function setId($id)
     {
@@ -258,16 +283,7 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
         return $this->chinese_zodiac;
     }
 
-    public function setType($type)
-    {
-        $this->type = $type;
-        return $this;
-    }
 
-    public function getType()
-    {
-        return $this->type;
-    }
 
     public function setPersonalCertification($personalCertification)
     {
@@ -295,5 +311,70 @@ class UserEntity extends ApigilityObjectStorageAwareEntity
     public function addProfessionalCertification($professionalCertification)
     {
         $this->professionalCertifications[] = $professionalCertification;
+    }
+
+    public function setOccupation($occupation)
+    {
+        $this->occupation = $occupation;
+        return $this;
+    }
+
+    public function getOccupation()
+    {
+        if ($this->occupation instanceof Occupation) return $this->hydrator->extract(new OccupationEntity($this->occupation));
+        else return $this->occupation;
+    }
+
+    public function setIncomeLevel($income_level)
+    {
+        $this->income_level = $income_level;
+        return $this;
+    }
+
+    public function getIncomeLevel()
+    {
+        if ($this->income_level instanceof IncomeLevel) return $this->hydrator->extract(new IncomeLevelEntity($this->income_level));
+        else return $this->income_level;
+    }
+
+    public function setResidenceAddress($residence_address)
+    {
+        $this->residence_address = $residence_address;
+        return $this;
+    }
+
+    public function getResidenceAddress()
+    {
+        if ($this->residence_address instanceof Address) return $this->hydrator->extract(new AddressEntity($this->residence_address));
+        else return $this->residence_address;
+    }
+
+    public function setCensusRegisterAddress($census_register_address)
+    {
+        $this->census_register_address = $census_register_address;
+        return $this;
+    }
+
+    public function getCensusRegisterAddress()
+    {
+        if ($this->census_register_address instanceof Address) return $this->hydrator->extract(new AddressEntity($this->census_register_address));
+        else return $this->census_register_address;
+    }
+
+    public function setTokens($tokens)
+    {
+        $this->tokens = $tokens;
+        return $this;
+    }
+
+    public function getTokens()
+    {
+        return $this->tokens->count();
+    }
+
+    public function getIdentity()
+    {
+        $identity = $this->serviceManager->get('ApigilityUser\Service\IdentityService')->getIdentity($this->id);
+        return $this->hydrator->extract($identity);
     }
 }

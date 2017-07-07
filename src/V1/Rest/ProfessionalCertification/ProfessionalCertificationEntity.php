@@ -2,6 +2,7 @@
 namespace ApigilityUser\V1\Rest\ProfessionalCertification;
 
 use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use ApigilityUser\DoctrineEntity\User;
 
 class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 {
@@ -72,7 +73,8 @@ class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getCertificationImageFront()
     {
-        return $this->certification_image_front;
+        if (empty($this->certification_image_front)) return $this->certification_image_front;
+        else return $this->renderUriToUrl($this->certification_image_front);
     }
 
     public function setCertificationImageBack($certification_image_back)
@@ -83,7 +85,8 @@ class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getCertificationImageBack()
     {
-        return $this->certification_image_back;
+        if (empty($this->certification_image_back)) return $this->certification_image_back;
+        else return $this->renderUriToUrl($this->certification_image_back);
     }
 
     public function setUser($user)
@@ -94,7 +97,8 @@ class ProfessionalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getUser()
     {
-        return $this->user;
+        if ($this->user instanceof User) return (object)[];
+        else return $this->user;
     }
 
     public function setStatus($status)

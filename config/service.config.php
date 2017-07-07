@@ -10,9 +10,10 @@ return [
         'factories' => array(
             'ApigilityUser\Service\IdentityService' => 'ApigilityUser\Service\IdentityServiceFactory',
             'ApigilityUser\Service\UserService' => 'ApigilityUser\Service\UserServiceFactory',
-            'ApigilityUser\Service\EaseMobService' => 'ApigilityUser\Service\EaseMobServiceFactory',
             'ApigilityUser\Service\PersonalCertificationService' => 'ApigilityUser\Service\PersonalCertificationServiceFactory',
             'ApigilityUser\Service\ProfessionalCertificationService' => 'ApigilityUser\Service\ProfessionalCertificationServiceFactory',
+            'ApigilityUser\Service\OccupationService' => 'ApigilityUser\Service\OccupationServiceFactory',
+            'ApigilityUser\Service\IncomeLevelService' => 'ApigilityUser\Service\IncomeLevelServiceFactory',
         ),
     )
 ];

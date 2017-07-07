@@ -8,21 +8,38 @@
 namespace ApigilityUser\Service;
 
 use ApigilityCatworkFoundation\Base\ApigilityEventAwareObject;
+use Doctrine\ORM\QueryBuilder;
 use Zend\ServiceManager\ServiceManager;
 use ApigilityUser\DoctrineEntity\Identity;
 use ApigilityUser\UserListener;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineToolPaginator;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrinePaginatorAdapter;
 
 class IdentityService extends ApigilityEventAwareObject
 {
     const EVENT_IDENTITY_CREATED = 'IdentityService.EventIdentityCreated';
+    const EVENT_GETTING_IDENTITIES = 'IdentityService.EVENT_GETTING_IDENTITIES';
 
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
     protected $em;
+
+    /**
+     * @var \ApigilityOauth2Adapter\OauthUserManager
+     */
     protected $oauthUserManager;
+
+    /**
+     * @var ServiceManager
+     */
+    protected $serviceManager;
 
     public function __construct(ServiceManager $services)
     {
         $this->em = $services->get('Doctrine\ORM\EntityManager');
         $this->oauthUserManager = $services->get('ApigilityOauth2Adapter\OauthUserManager');
+        $this->serviceManager = $services;
     }
 
     /**
@@ -46,12 +63,8 @@ class IdentityService extends ApigilityEventAwareObject
      */
     public function identityExist($condition)
     {
-        $dql = "SELECT i FROM ApigilityUser\\DoctrineEntity\\Identity i WHERE i.phone=?1";
-        $rs = $this->em->createQuery($dql)
-            ->setParameter(1, $condition['phone'])
-            ->getResult();
-
-        if (count($rs)) return true;
+        $identities = $this->em->getRepository('ApigilityUser\DoctrineEntity\Identity')->findBy($condition);
+        if (count($identities)) return true;
         else return false;
     }
 
@@ -65,29 +78,32 @@ class IdentityService extends ApigilityEventAwareObject
      */
     public function createIdentity($data)
     {
-        if (!$this->identityExist(array(
-            'phone'=>$data->phone // 检查手机号是否已经注册
-        ))) {
-            // 创建认证用户
-            $oauth_user = $this->oauthUserManager->createUser($data->password);
+        // 检查手机号是否已经注册
+        if (isset($data->phone)) {
+            $condition = ['phone'=>$data->phone];
+            if (isset($data->type)) $condition['type'] = $data->type;
 
-            $identity = new Identity();
-            $identity->setId($oauth_user->getUsername());
-            $identity->setPhone($data->phone);
-            if (isset($data->type)) $identity->setType($data->type);
-
-            $this->em->persist($identity);
-            $this->em->flush();
-
-            // 触发标识已创建事件
-            $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, [
-                'user_id' => $identity->getId(),
-                'password'=>$data->password
-            ]);
-            return $identity;
-        } else {
-            throw new Exception\PhoneExistException();
+            if ($this->identityExist($condition)) throw new Exception\PhoneExistException();
         }
+
+        // 创建认证用户
+        $oauth_user = $this->oauthUserManager->createUser($data->password);
+
+        $identity = new Identity();
+        $identity->setId($oauth_user->getUsername());
+        if (isset($data->phone)) $identity->setPhone($data->phone);
+        if (isset($data->type)) $identity->setType($data->type);
+
+        $this->em->persist($identity);
+        $this->em->flush();
+
+        // 触发标识已创建事件
+        $this->getEventManager()->trigger(self::EVENT_IDENTITY_CREATED, $this, [
+            'user_id' => $identity->getId(),
+            'password'=>$data->password
+        ]);
+
+        return $identity;
     }
 
     /**
@@ -114,5 +130,40 @@ class IdentityService extends ApigilityEventAwareObject
         }
 
         return $identity;
+    }
+
+    public function getIdentities($params)
+    {
+        $qb = new QueryBuilder($this->em);
+        $qb->select('i')->from('ApigilityUser\DoctrineEntity\Identity', 'i');
+
+        $where = '';
+
+        if (isset($params->phone)) {
+            if (!empty($where)) $where .= ' AND ';
+            $where .= 'i.phone = :phone';
+        }
+
+        if (isset($params->type)) {
+            if (!empty($where)) $where .= ' AND ';
+            $where .= 'i.type = :type';
+        }
+
+        if (!empty($where)) {
+            $qb->where($where);
+
+            if (isset($params->phone)) $qb->setParameter('phone', $params->phone);
+            if (isset($params->type)) $qb->setParameter('type', $params->type);
+        }
+
+        $doctrine_paginator = new DoctrineToolPaginator($qb->getQuery());
+        $doctrine_paginator_adapter = new DoctrinePaginatorAdapter($doctrine_paginator);
+
+        // 触发查找标识列表事件
+        $this->getEventManager()->trigger(self::EVENT_GETTING_IDENTITIES, $this, [
+            'doctrine_paginator_adapter' => $doctrine_paginator_adapter
+        ]);
+
+        return $doctrine_paginator_adapter;
     }
 }

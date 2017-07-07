@@ -2,6 +2,8 @@
 namespace ApigilityUser\V1\Rest\PersonalCertification;
 
 use ApigilityCatworkFoundation\Base\ApigilityObjectStorageAwareEntity;
+use ApigilityUser\DoctrineEntity\User;
+use ApigilityUser\V1\Rest\User\UserEntity;
 
 class PersonalCertificationEntity extends ApigilityObjectStorageAwareEntity
 {
@@ -25,6 +27,13 @@ class PersonalCertificationEntity extends ApigilityObjectStorageAwareEntity
      * @Column(type="string", length=255, unique=true)
      */
     protected $identity_card_image_back;
+
+    /**
+     * 手持身份证照片
+     *
+     * @Column(type="string", length=255, nullable=true)
+     */
+    protected $holding_identity_card_image;
 
     /**
      * 用户
@@ -73,7 +82,8 @@ class PersonalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getIdentityCardImageFront()
     {
-        return $this->identity_card_image_front;
+        if (empty($this->identity_card_image_front)) return $this->identity_card_image_front;
+        else return $this->renderUriToUrl($this->identity_card_image_front);
     }
 
     public function setIdentityCardImageBack($identity_card_image_back)
@@ -84,7 +94,20 @@ class PersonalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getIdentityCardImageBack()
     {
-        return $this->identity_card_image_back;
+        if (empty($this->identity_card_image_back)) return $this->identity_card_image_back;
+        else return $this->renderUriToUrl($this->identity_card_image_back);
+    }
+
+    public function setHoldingIdentityCardImage($holding_identity_card_image)
+    {
+        $this->holding_identity_card_image = $holding_identity_card_image;
+        return $this;
+    }
+
+    public function getHoldingIdentityCardImage()
+    {
+        if (empty($this->holding_identity_card_image)) return $this->holding_identity_card_image;
+        else return $this->renderUriToUrl($this->holding_identity_card_image);
     }
 
     public function setUser($user)
@@ -95,7 +118,8 @@ class PersonalCertificationEntity extends ApigilityObjectStorageAwareEntity
 
     public function getUser()
     {
-        return $this->user;
+        if ($this->user instanceof User) return (object)[];
+        else return $this->user;
     }
 
     public function setStatus($status)
