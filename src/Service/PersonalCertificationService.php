@@ -48,7 +48,20 @@ class PersonalCertificationService extends ApigilityEventAwareObject
     {
         $personalCertification = new DoctrineEntity\PersonalCertification();
         $personalCertification->setStatus($personalCertification::STATUS_NOT_REVIEW);
-        if (isset($data->identity_card_number)) $personalCertification->setIdentityCardNumber($data->identity_card_number);
+        if (isset($data->identity_card_number)) {
+            $personalCertification->setIdentityCardNumber($data->identity_card_number);
+
+            // 设置用户的性别和年龄
+            $result = file_get_contents('http://apis.juhe.cn/idcard/index?cardno=' . $data->identity_card_number . '&dtype=json&key=619781682bbaa5576f8fe7fc3ff5abe3');
+            $result = json_decode($result, true);
+            if (!is_array($result['result'])) {
+                throw new \Exception($result['reason'], 404);
+            }
+            $user->setSex($result['result']['sex'] == '男' ? User::SEX_MALE : User::SEX_FEMALE);
+            $bir_year = substr($result['result']['birthday'], 0, 4);
+            $year = date('Y');
+            $user->setAge($year - $bir_year);
+        }
         if (isset($data->identity_card_image_front)) $personalCertification->setIdentityCardImageFront($data->identity_card_image_front);
         if (isset($data->identity_card_image_back)) $personalCertification->setIdentityCardImageBack($data->identity_card_image_back);
         if (isset($data->holding_identity_card_image)) $personalCertification->setHoldingIdentityCardImage($data->holding_identity_card_image);
